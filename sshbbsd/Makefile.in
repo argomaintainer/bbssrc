@@ -1,0 +1,132 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+sbindir=@sbindir@
+libexecdir=@libexecdir@
+mandir=@mandir@
+mansubdir=@mansubdir@
+sysconfdir=@sysconfdir@
+piddir=@piddir@
+srcdir=@srcdir@
+top_srcdir=@top_srcdir@
+
+DESTDIR=
+
+VPATH=@srcdir@
+
+SSH_PROGRAM=@bindir@/ssh
+ASKPASS_LOCATION=@libexecdir@/ssh
+ASKPASS_PROGRAM=$(ASKPASS_LOCATION)/ssh-askpass
+
+CC=@CC@
+LD=@LD@
+PATHS=-DETCDIR=\"$(sysconfdir)\" -DSSH_PROGRAM=\"$(SSH_PROGRAM)\" -DSSH_ASKPASS_DEFAULT=\"$(ASKPASS_PROGRAM)\" -I../include
+CFLAGS=@CFLAGS@ $(PATHS) @DEFS@
+LIBS=@LIBS@ -lSystem -ltermcap -lZModem
+INSTALL=@INSTALL@
+PERL=@PERL@
+LDFLAGS=-L../lib @LDFLAGS@
+
+TARGETS=sshbbsd $(EXTRA_TARGETS)
+
+SSHDOBJS= sshd.o auth-rhosts.o auth-krb4.o auth-passwd.o auth-rsa.o auth-rh-rsa.o pty.o log-server.o login.o servconf.o serverloop.o bsd-login.o md5crypt.o \
+ atomicio.o authfd.o authfile.o bsd-bindresvport.o bsd-daemon.o bsd-misc.o bsd-mktemp.o bsd-rresvport.o bufaux.o buffer.o canohost.o channels.o cipher.o compat.o compress.o crc32.o deattack.o fake-getaddrinfo.o fake-getnameinfo.o fingerprint.o hostfile.o log.o match.o mpaux.o nchan.o packet.o radix.o random.o readpass.o rsa.o tildexpand.o ttymodes.o uidswap.o xmalloc.o 
+
+BBSDOBJS = \
+	   ../src/activeboard.o  \
+	   ../src/announce.o  \
+	   ../src/bbs.o  \
+	   ../src/bcache.o  \
+	   ../src/bm.o  \
+	   ../src/boards.o  \
+	   ../src/chat.o  \
+	   ../src/comm_lists.o  \
+	   ../src/delete.o  \
+	   ../src/edit.o  \
+	   ../src/endline.o  \
+	   ../src/filter.o  \
+	   ../src/five.o  \
+	   ../src/goodbye.o  \
+	   ../src/help.o  \
+	   ../src/io.o  \
+	   ../src/list.o  \
+	   ../src/listedit.o  \
+	   ../src/mail.o  \
+	   ../src/main.o  \
+	   ../src/maintain.o  \
+	   ../src/modetype.o  \
+	   ../src/more.o  \
+	   ../src/namecomplete.o  \
+	   ../src/pass.o  \
+	   ../src/postheader.o  \
+	   ../src/read.o  \
+	   ../src/record.o  \
+	   ../src/register.o  \
+	   ../src/report.o  \
+	   ../src/screen.o  \
+	   ../src/sendmsg.o  \
+	   ../src/shm.o  \
+	   ../src/stat.o  \
+	   ../src/stuff.o  \
+	   ../src/talk.o  \
+	   ../src/term.o  \
+	   ../src/thread.o  \
+	   ../src/ucache.o  \
+	   ../src/userinfo.o  \
+	   ../src/vote.o  \
+	   ../src/xyz.o 
+
+
+CONFIGFILES=sshd_config ssh_config
+
+PATHSUBS	= -D/etc/ssh_config=$(sysconfdir)/ssh_config -D/etc/known_hosts=$(sysconfdir)/ssh_known_hosts -D/etc/sshd_config=$(sysconfdir)/sshd_config -D/etc/shosts.equiv=$(sysconfdir)/shosts.equiv -D/etc/ssh_host_key=$(sysconfdir)/ssh_host_key -D/var/run/sshd.pid=$(piddir)/sshd.pid
+
+FIXPATHSCMD	= $(PERL) $(srcdir)/fixpaths $(PATHSUBS)
+
+all: $(TARGETS) $(CONFIGFILES)
+
+bbsd.o: ../src/bbsd.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+sshbbsd: config.h bbsd.o $(SSHDOBJS) $(BBSDOBJS)
+	$(CC) -o $@ bbsd.o $(SSHDOBJS) $(BBSDOBJS) $(LDFLAGS) $(LIBS)
+
+clean:
+	rm -f *.o *.a $(TARGETS) config.status config.cache config.log 
+	rm -f *.out core
+
+distclean: clean
+	rm -f Makefile config.h core *~
+
+mrproper: distclean
+
+veryclean: distclean
+	rm -f configure config.h.in *.0
+
+update: $(TARGETS)
+        mv -f /home/bbs/bin/sshbbsd /home/bbs/bin/sshbbsd.old
+        cp sshbbsd /home/bbs/bin/sshbbsd
+        chown bbs:bbs /home/bbs/bin/sshbbsd
+
+install: $(TARGETS)
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) -s sshbbsd $(DESTDIR)$(bindir)/sshbbsd
+
+	if [ ! -f $(DESTDIR)$(sysconfdir)/ssh_config -a ! -f $(DESTDIR)$(sysconfdir)/sshd_config ]; then \
+		$(INSTALL) -d $(DESTDIR)$(sysconfdir); \
+		$(INSTALL) -m 644 ssh_config.out $(DESTDIR)$(sysconfdir)/ssh_config; \
+		$(INSTALL) -m 644 sshd_config.out $(DESTDIR)$(sysconfdir)/sshd_config; \
+	fi
+
+uninstallall:	uninstall
+	-rm -f $(DESTDIR)$(sysconfdir)/ssh_config
+	-rm -f $(DESTDIR)$(sysconfdir)/sshd_config
+	-rmdir $(DESTDIR)$(sysconfdir)
+	-rmdir $(DESTDIR)$(bindir)
+	-rmdir $(DESTDIR)$(sbindir)
+	-rmdir $(DESTDIR)$(libexecdir)
+
+uninstall: 
+	-rm -f $(DESTDIR)$(sbindir)/sshd
+	-rm -f $(DESTDIR)${ASKPASS_PROGRAM}
+	-rmdir $(DESTDIR)$(libexecdir)/ssh ;

@@ -1,0 +1,62 @@
+####################################################################
+#                                                                  #
+# Makefile for PukeBBS series                                      #
+#                                                                  #
+# This script is automatically created and configured via script,  #
+# DONOT modify unless you know what you are doing.                 #
+#                                                                  #
+####################################################################
+
+# basic information
+BBSHOME  = @BBSHOME@
+BBSUID   = @BBSUID@
+BBSGID   = @BBSGID@
+
+# compiler information
+OSDEF    = @OSDEF@
+CC       = @CC@
+CFLAGS   = @CFLAGS@
+LIBS     = @LIBS@
+
+DIRS 	 = libSystem libBBS libZModem
+
+#############################################################
+###        You needn't modify the following stuff      ######
+#############################################################
+
+all: 
+	@for x in $(DIRS); \
+	do \
+		echo "  --> lib/$$x"; \
+		(cd $$x; make all CC=$(CC) OSDEF="$(OSDEF)"; cd .. ); \
+		echo "  <-- lib/$$x"; \
+		echo " "; \
+	done
+
+rmlib:
+	-rm -rf *.a
+
+clean: /tmp
+	@echo "== cleanning junks, object files, and binaries .. =="
+	-rm -fr *~ *.o *.bak *.tmp
+	@for x in $(DIRS); \
+	do \
+		echo "  --> lib/$$x"; \
+		(cd $$x; make clean ; cd .. ); \
+		echo "  <-- lib/$$x"; \
+		echo " "; \
+	done
+
+cleanall: /tmp
+	@echo "== cleanning junks, object files, and binaries .. =="
+	-rm -fr *~ *.o *.bak *.a
+	@for x in $(DIRS); \
+	do \
+		echo "  --> lib/$$x"; \
+		(cd $$x; make cleanall ; cd .. ); \
+		echo "  <-- lib/$$x"; \
+		echo " "; \
+	done
+
+install:
+	@echo --- lib: no install skip ---

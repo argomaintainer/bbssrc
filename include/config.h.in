@@ -1,0 +1,133 @@
+/*
+    Pirate Bulletin Board System
+    Copyright (C) 1990, Edward Luke, lush@Athena.EE.MsState.EDU
+    Eagles Bulletin Board System
+    Copyright (C) 1992, Raymond Rocker, rocker@rock.b11.ingr.com
+			Guy Vega, gtvega@seabass.st.usm.edu
+			Dominic Tynes, dbtynes@seabass.st.usm.edu
+    Firebird Bulletin Board System
+    Copyright (C) 1996, Hsien-Tsung Chang, Smallpig.bbs@bbs.cs.ccu.edu.tw
+			Peng Piaw Foong, ppfoong@csie.ncu.edu.tw
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 1, or (at your option)
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+*/
+
+#define BBSVERSION      "PukeBBSD 0.1.2"
+
+/*
+ *  板主任命时， 如果希望任命文章不仅仅发送到被任命版面，而且同时发送到
+ *  sysop 板，或其他版面，你可以打开下面的定义。其中的 Test 可以改成你
+ *  希望发表的版面。注意：这个版面一定要是存在的。
+ */
+
+#define ORDAINBM_POST_BOARDNAME "@ORDAINBM_POST_BOARDNAME@"
+
+/*
+ *  允许开启外部程序的用户数目。 比如：BBSNET、WINMINE、SHOWUSER 等
+ */
+
+#define MAX_USESHELL   40
+
+/*
+ *  Define this to enable wide character support for Chinese or other
+ *  languages not using the ANSI character set. Comment out if this isn't
+ *  needed.
+ */
+#define BIT8
+
+/*
+ *  You may define a default board here, already selected when a user logs in.
+ *  If this is set to the empty string, the bbs will require users to (S)elect
+ *  a board before reading or posting. Don't comment this out.
+ */
+#define DEFAULTBOARD    "@DEFAULTBOARD@"
+
+/*
+ *  This board is appeared in users' favorite list by default.
+ *
+ */ 
+#define DEFAULTFAVBOARD "@DEFAULTFAVBOARD@"
+
+/*
+ *  This board is the article recommended to by default.
+ *
+ */
+
+#define DEFAULTRECOMMENDBOARD "@DEFAULTRECOMMENDBOARD@"
+
+/*
+ *  You get this many chances to give a valid userid/password combination
+ *  before the bbs squawks at you and closes the connection.
+ *  Don't comment out.
+ */
+#define LOGINATTEMPTS 3
+
+/*
+ *  Turn this on to allow users to create their own accounts by typing 'new'
+ *  at the "Enter userid:" prompt. Comment out to restrict access to accounts
+ *  created by the Sysop (see important note in README.install).
+ */
+#define LOGINASNEW 1
+
+/*
+ *  Define this if you want the Internet Post/Mail Forwarding features
+ *  enabled. You MUST have the sendmail(8) program on your system and
+ *  a cron job to run the bbs mail queue every so often. The bbs does not
+ *  invoke sendmail, it simply creates the queue and data files for it.
+ */
+
+/*
+ *  Define DOTIMEOUT to set a timer to log out users who sit idle on the system.
+ *  Then decide how long to let them stay: MONITOR_TIMEOUT is the time in
+ *  seconds a user can sit idle in Monitor mode; IDLE_TIMEOUT applies to all
+ *  other modes.
+ */
+#define DOTIMEOUT 1
+
+/*
+ *  These are moot if DOTIMEOUT is commented; leave them defined anyway.
+ */
+#define IDLE_TIMEOUT    (60 * 40)
+#define LOGIN_TIMEOUT   (60 * 3)
+
+/****************************************************************************/
+
+#define MAXUSERS  	@MAXUSERS@
+#define MAXBOARD  	@MAXBOARDS@
+#define MAXACTIVE 	@MAXONLINEUSERS@
+
+/* Define this to show real names to SYSOP in the Config Menu user list. */
+#define ACTS_REALNAMES       1
+
+/* Define this for Query to show real names. */
+#define QUERY_REALNAMES      1
+
+/* Define this to stamp mark on edited post */
+#define ADD_EDITMARK     1
+
+/*
+ * Well, there's defined BBS related information that from configure
+ * so we don't need define this by passing make argument to the complier
+ */
+#define BBSUID   @BBSUID@
+#define BBSGID   @BBSGID@
+#define BBSHOME  "@BBSHOME@"
+#define BBSNAME  "@BBSNAME@"
+#define BBSID    "@DELIVER@"
+#define BBSHOST  "@BBSHOST@"
+#define BBSIP	 "@BBSIP@"
+
+/*
+ * Define where's sendmail locate, it's not the same in different OSes
+ * If configure cannot found it propery, it will assign "/usr/lib/sendmail"
+ * for default.
+ */
+#define	SENDMAIL "/usr/sbin/sendmail"

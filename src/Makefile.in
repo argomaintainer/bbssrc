@@ -1,0 +1,123 @@
+####################################################################
+#                                                                  #
+# Makefile for PukeBBS series                                      #
+#                                                                  #
+# This script is automatically created and configured via script,  #
+# DONOT modify unless you know what you are doing.                 #
+#                                                                  #
+####################################################################
+
+# basic information
+BBSHOME  = @BBSHOME@
+BBSUID   = @BBSUID@
+BBSGID   = @BBSGID@
+
+# compiler information
+OSDEF    = @OSDEF@
+CC       = @CC@
+CFLAGS   = @CFLAGS@
+LIBS     = @LIBS@
+
+# installer
+INSTALL  = ../install.sh
+
+#############################################################
+###        You needn't modify the following stuff      ######
+#############################################################
+PROGNAME = bbsd
+CFILE    = announce.c bbs.c bbsd.c bcache.c ucache.c bm.c \
+           boards.c chat.c comm_lists.c delete.c edit.c shm.c goodbye.c \
+           help.c io.c list.c mail.c main.c maintain.c modetype.c more.c \
+           namecomplete.c pass.c postheader.c read.c record.c \
+           register.c screen.c sendmsg.c stuff.c talk.c term.c \
+           userinfo.c vote.c xyz.c five.c report.c listedit.c \
+           activeboard.c endline.c stat.c filter.c thread.c
+
+COBJS    = announce.o bbs.o bbsd.o bcache.o ucache.o bm.o \
+           boards.o chat.o comm_lists.o delete.o edit.o shm.o goodbye.o \
+           help.o io.o list.o mail.o main.o maintain.o modetype.o more.o \
+           namecomplete.o pass.o postheader.o read.o record.o \
+           register.o screen.o sendmsg.o stuff.o talk.o term.o \
+           userinfo.o vote.o xyz.o five.o report.o listedit.o \
+           activeboard.o endline.o stat.o filter.o thread.o
+
+GARBAGE  = core installchatd chatd *~ *.bak* *.tmp *.save
+
+# The -DINVISIBLE makes bbs users invisible to 'finger' and 'who'.
+# Simply remove it if you don't want this feature.
+
+DEFINES = $(OSDEF) -DBBSMAIN -I../include
+
+.SUFFIXES: .o .c
+
+.c.o:	;$(CC) $(CFLAGS) $(DEFINES) -c $*.c
+
+#--------------------- Dependency starts here -------------------
+all:  $(PROGNAME) chatd reportd expire bbsnet 
+
+$(PROGNAME): $(COBJS)
+	$(CC) -o $(PROGNAME) $(CFLAGS) $(DEFINES) $(COBJS) $(LIBS) -L../lib -lSystem -lZModem
+	@echo "Program size: `cat $(PROGNAME)|wc -c` bytes"
+
+chatd: station.c
+	$(CC) $(CFLAGS) -o chatd $(DEFINES) station.c $(LIBS) -L../lib -lSystem
+
+reportd: reportd.c
+	$(CC) $(CFLAGS) -o reportd $(DEFINES) reportd.c $(LIBS)  -L../lib -lSystem
+
+bbsnet: bbsnet.c
+	$(CC) $(CFLAGS) -o bbsnet $(DEFINES) bbsnet.c $(LIBS) -L../lib -lSystem
+
+install:
+	sh Install.sh
+
+installbbs: bbsd
+#	$(INSTALL) -s -m 550 -g $(BBSGID) -o $(BBSUID) bbsd $(BBSHOME)/bin/bbsd.new
+	-cp bbsd $(BBSHOME)/bin/bbsd.new
+	-rm -f $(BBSHOME)/bin/bbsd.old
+	-mv $(BBSHOME)/bin/bbsd $(BBSHOME)/bin/bbsd.old
+	mv $(BBSHOME)/bin/bbsd.new $(BBSHOME)/bin/bbsd
+
+installbbsnet: bbsnet
+	$(INSTALL) -s -m 550 -g $(BBSGID) -o $(BBSUID) bbsnet $(BBSHOME)/bin/bbsnet.new
+	-rm -f $(BBSHOME)/bin/bbsnet.old
+	-mv $(BBSHOME)/bin/bbsnet $(BBSHOME)/bin/bbsnet.old
+	mv $(BBSHOME)/bin/bbsnet.new $(BBSHOME)/bin/bbsnet
+
+installchatd: chatd
+	$(INSTALL) -s -m 550 -g $(BBSGID) -o $(BBSUID) chatd $(BBSHOME)/bin/chatd.new
+	-rm -f $(BBSHOME)/bin/chatd.old
+	-mv $(BBSHOME)/bin/chatd $(BBSHOME)/bin/chatd.old
+	mv $(BBSHOME)/bin/chatd.new $(BBSHOME)/bin/chatd
+
+installreportd: reportd
+	$(INSTALL) -s -m 550 -g $(BBSGID) -o $(BBSUID) reportd $(BBSHOME)/bin/reportd.new
+	-rm -f $(BBSHOME)/bin/reportd.old
+	-mv $(BBSHOME)/bin/reportd $(BBSHOME)/bin/reportd.old
+	mv $(BBSHOME)/bin/reportd.new $(BBSHOME)/bin/reportd 
+
+clean: /tmp
+	-rm -fr $(GARBAGE) $(COBJS) $(PROGNAME) $(LNFILES) expire
+	-rm -fr bbsnet 
+
+cleanall: clean
+	-rm -f Install.sh
+	-rm -f ../include/config.h
+	-rm -f ../include/chat.h
+	-rm -f bbs chatd reportd
+
+tags: /tmp
+	ctags $(CFILE)
+
+update: installbbs installchatd installreportd installexpire installbbsnet
+
+expire: expire.c record.c
+	$(CC) $(CFLAGS) $(DEFINES) -o expire expire.c -L../lib -lSystem
+
+installexpire: expire
+	$(INSTALL) -s -m 550 -g $(BBSGID) -o $(BBSUID) expire $(BBSHOME)/bin/expire.new
+	-rm -f $(BBSHOME)/bin/expire.old
+	-mv $(BBSHOME)/bin/expire $(BBSHOME)/bin/expire.old
+	mv $(BBSHOME)/bin/expire.new $(BBSHOME)/bin/expire
+
+# DO NOT DELETE

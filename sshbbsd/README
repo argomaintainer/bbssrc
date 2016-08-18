@@ -1,0 +1,2 @@
+This is an integration of openssh with bbsd. It provides ssh login interface
+to the normal bbs daemon. 

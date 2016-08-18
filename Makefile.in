@@ -1,0 +1,85 @@
+####################################################################
+#                                                                  #
+# Makefile for PukeBBS series                                      # 
+#                                                                  #
+# This script is automatically created and configured via script,  #
+# DONOT modify unless you know what you are doing.                 #
+#                                                                  #
+####################################################################
+
+# basic information
+BBSHOME  = @BBSHOME@
+BBSUID   = @BBSUID@
+BBSGID   = @BBSGID@
+
+# compiler information
+OSDEF    = @OSDEF@
+CC       = @CC@
+CFLAGS   = @CFLAGS@
+LIBS     = @LIBS@
+
+# installer
+INSTALL  = @INSTALLER@
+
+# misc. settings
+MAKEFLAG = CC=$(CC) BBSHOME="$(BBSHOME)" OS_DEF="$(OSDEF)" CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" INSTALL="$(INSTALL)" BBS_UID=$(BBSUID) BBSGID=$(BBSGID)
+
+DIRS	 = lib src
+DIRS2	 = lib src util
+
+# You needn't change the make rule, if you can't understand what are you doing
+
+all:
+	@echo "== Making main program and relatve src =="
+	@for x in $(DIRS); \
+	do \
+		echo "--> $$x"; \
+		(cd $$x; make $(MAKEFLAG) all ; cd .. ); \
+		echo "<-- $$x"; \
+		echo " "; \
+	done
+	echo "done."
+
+install: all
+	@echo "== Installing Everything ... =="
+	@for x in $(DIRS); \
+	do \
+		echo "--> $$x"; \
+		(cd $$x; make install ; cd .. ); \
+		echo "<-- $$x"; \
+		echo " "; \
+	done
+	chown -R $(BBSUID):$(BBSGID) $(BBSHOME)
+
+update: all
+	@echo "== update binary ... =="
+	@echo "-->src/"
+	(cd src; make $(MAKEFLAG) update; cd ..)
+	@echo "<--src/"
+
+clean:
+	@echo "== cleanning junks, object files, and binaries .. =="
+	-rm -fr *~ *.o *.bak *.tmp
+	@for x in $(DIRS); \
+	do \
+		echo "--> $$x"; \
+		(cd $$x; make clean ; cd .. ); \
+		echo "<-- $$x"; \
+		echo " "; \
+	done
+	echo "done."
+
+cleanall: clean
+	@echo "== cleanning all objfile, binaries .. =="
+	-rm -fr *~ *.o *.bak* *.save *.tmp shm.tmp configure.inf config.log config.cache DEADVE
+	-rm -fr ./include/chat.h ./include/config.h
+	-rm -fr ./Makefile ./src/Makefile ./lib/Makefile ./util/game/Makefile ./util/innbbsd/Makefile ./util/stat/Makefile
+	@for x in $(DIRS2); \
+	do \
+		echo "--> $$x"; \
+		(cd $$x; make cleanall ; cd .. ); \
+		echo "<-- $$x"; \
+		echo " "; \
+		done
+	-rm -fr Makefile
+

@@ -1,0 +1,72 @@
+[Install_MY_BBS]
+
+    【注意】本文是安装指南，如果您想升级您的 BBS，请您仔细阅读本目
+            录下的 Update_To_FB2000 。
+
+    ※※
+    ※※如果您准备安装 FB2000 的机子上正在运行另外一个 BBS ，并且您
+    ※※希望能够同时运行两个 BBS ，请您检查 include/bbs.h 中的 SHM
+    ※※shmkeys 的值， 两个 BBS 中的 shmkeys 应该都不一样。
+    ※※
+
+    本文的内容是告诉您，如何在一台只有普通系统帐号的机器上安装您自
+    己的 BBS。 比方说您在 mail.somesite.com 上有一个帐号 mygod ，
+    您希望在 mail.somesite.com 上安装一个您自己的 BBS ，那么下面的
+    过程可能会让你建立一个 BBS。 
+
+    【假设】您的帐号名为 mygod ，您的用户目录是 /home/mygod ，您想
+            把 BBS 安装到 /home/mygod/bbs 下
+
+    0. 获取 FB2000v0918.tar.gz ，放在 /home/mygod 目录下。
+
+    1. 取得您的帐号的组名、UID、GID。
+
+       用您的帐号登陆到系统上，执行 cat /etc/passwd | grep mygod
+       假设得到： mygod:x:2301:133::/home/mygod:/bin/bash
+       那么说明：您的 UID 是 2301； GID 是 133
+
+       用您的帐号登陆到系统上，再执行 cat /etc/group | grep 133 
+       假设得到： mailuser::133:  ， 
+       那么说明：您的组名是 mailuser
+
+       即：USER=mygod; GROUP=mailuser; UID=2301; GID=133
+
+    2. 执行命令： cd /home/mygod; tar -vzxf FB2000v0918.tar.gz
+       这个命令将把 FB2000 的代码解压到 /home/mygod/bbssrc 下
+
+       如果您在 Solaris 下，则可能需要执行下列命令：
+          cd /home/mygod; gunzip FB2000v0918.tar.gz; 
+          tar vxf FB2000v0918.tar
+    
+    3. 执行命令： cd /home/mygod/bbssrc; ./configure
+       这个命令将作安装前的配置，请注意 ./configure 时的配置：
+
+ ..................................
+   Please fill data for your BBS
+   请填写与贵站相关的 BBS 数据.
+ ..................................
+./configure: cd: /home/bbs: Permission denied
+Home directory of BBS --> [/home/dragon/bbssrc]/home/mygod/bbs
+UID of BBS --> [9999]2301
+USER of BBS --> [bbs]mygod
+GID of BBS --> [999]133
+GROUP of BBS --> [bbs]mailuser
+The ID of your site --> [AddWaterBBS]mygodBBS
+The name of your site --> [快意灌水站]mygod 的 BBS
+ .................................    
+
+       【注意】上面的 "[ ]" 之后的内容是在第 1 步中得到的，如果填写
+               不正确， 则您的 BBS 可能安装不起来。
+
+    4. 执行命令： make; make install ; ../bbs/bin/bbsd 12345
+       这个命令将编译并安装您的 BBS，最后启动您的 BBS。
+
+    5. telnet locahost 12345 ，顺利的话，您将会看到 BBS 的欢迎画面，
+       这时请输入 new 建立 SYSOP 的帐号。请注意！SYSOP 五个字母都
+       要大写。然后您就根据系统的提示输入相应的信息。
+
+    6. 用同样的方式建立 guest 帐号，使得别人可以用 guest 登陆您的
+       站点。
+
+    7. 这时，您的 BBS 已经安装成功了，您可以召集您的朋友们来一起
+       建设您的 BBS 了！ 恭喜您！

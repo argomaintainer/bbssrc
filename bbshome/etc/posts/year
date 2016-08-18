@@ -1,0 +1,8 @@
+
+
+    此为热门标题统计档，由 poststat 程式自动产生。
+
+    请参阅 bbssrc/doc/Firebird-30，编辑 bbssrc/util/local_utl
+    下的相关程式，并把 crontab 设好。
+
+    crontab 的编写可参考 bbssrc/doc/example 目录下的 cron.bbs。

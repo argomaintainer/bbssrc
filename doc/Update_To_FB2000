@@ -1,0 +1,55 @@
+[Update_To_FB2000]
+
+    【注意】本文是 BBS 升级指南，如果您想安装一个新的 BBS，请您仔细阅
+            读本目录下的 FB2000_Quick_Install 或者 Install_MY_BBS 。
+    【注意】因为升级事关重大，请备份您的原有 BBS 数据。并强烈建议先禁
+            止已有的 BBS 的运行，然后 reboot 系统，并确保原有的 BBS 没
+            有运行。( 这个 reboot 系统的操作不是必须的, 但是推荐您做 )
+
+    【假设】不管您是从什么版本升级，这里均假设你先前的 BBS 在 /home/bbs 
+	    下，先前的 BBS 源代码在 /home/bbssrc 目录下。新的 FB2000 代
+ 	    码在 /tmp 下( /tmp/FB2000v0918.tar.gz )。
+
+    0. 备份您的 BBS 数据。
+       tar vzcf /tmp/My_OLD_bbs.tar.gz /home/bbs /home/bbssrc
+       mv /home/bbs /home/bbs.old; mv /home/bbssrc /home/bbssrc.old
+       【注意】不要用 cp 的方法来备份，这样容易漏掉一些文件！！！
+
+    1. 按照本目录下的 FB2000_Quick_Install 或者 Install_MY_BBS 这两个文
+       件来安装一个全新的 BBS。新的 BBS 路径为 /home/bbs 和 /home/bbssrc
+       这一步是为了保证安装一个完整的 FB2000 。
+
+    2. 确认文件和目录的存在。为了保证升级的安全，请确认：
+       /home/bbs.old            老的 BBS 的全部数据
+       /home/bbssrc.old         老的 BBS 的源代码数据
+       /home/bbs                刚刚安装的 BBS 目录
+       /home/bbssrc             刚刚安装的 BBS 源代码目录
+       /tmp/My_OLD_bbs.tar.gz   老的 BBS 的数据备份
+       建议将 /tmp/My_OLD_bbs.tar.gz 传到另外一台机上再次备份。
+
+    3. 删除刚刚安装的 BBS 下的『部分』目录和文件。
+       cd /home/bbs 
+       rm -Rf .BOARDS .PASSWDS .PASSFLUSH .badname .bad_email 
+       rm -Rf home mail boards vote  0Announce
+
+    4. 转移老站的数据到新安装的 BBS 目录。
+       cd /home/bbs.old
+       mv .BOARDS .PASSWDS .badname .bad_email  /home/bbs
+       mv home mail boards vote  0Announce /home/bbs
+
+    5. 『如果您的老系统是 FB2000 的以前版本，那么这步您可以跳过去。』
+       转换 .PASSWDS 文件格式。
+       执行：cd /home/bbssrc/util/upgrade ; cp /home/bbs/.PASSWDS .
+       仔细阅读 /home/bbssrc/util/upgrade 下面的 00README 文件。
+       根据 00README 中的提示做相应操作！
+       然后在 /home/bbssrc/util/upgrade 目录下应该会产生 .PASSWDS.new 
+       文件， 执行命令： cp .PASSWDS.new /home/bbs/.PASSWDS
+
+    6. 恭喜您，您已经升级好了你的 BBS, 建议您重新启动您的计算机，
+       然后测试新的 BBS 系统。
+       如果您不想重新启动计算机，则请用 ipcs 看看是否有 SHM ，有
+       的话，请用 ipcrm 清除掉； 再用 ps -A | grep bbsd 看看是否
+       有老的 bbsd 在执行，有的话，请用 kill -9 清除掉。
+       『还是 reboot 系统比较直接』
+
+    7. 如果有问题可以到 fb2000.dhs.org (快意灌水站) 来寻找答案。

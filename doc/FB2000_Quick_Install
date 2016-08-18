@@ -1,0 +1,57 @@
+[FB2000_Quick_Install]
+
+    【注意】本文是安装指南，如果您想升级您的 BBS，请您仔细阅读本目
+            录下的 Update_To_FB2000 。
+	    如果您在系统上只有一个普通的帐号，则你可以参考本目录下
+	    的 Install_MY_BBS 的安装过程。
+
+    ※※
+    ※※如果您准备安装 FB2000 的机子上正在运行另外一个 BBS ，并且您
+    ※※希望能够同时运行两个 BBS ，请您检查 include/bbs.h 中的 SHM
+    ※※shmkeys 的值， 两个 BBS 中的 shmkeys 应该都不一样。
+    ※※
+
+    本文件是 FB2000 的快速安装指南，如果您急着安装 BBS，可以依照本
+    文件的说明一步一步操作，即可快速安装好 BBS。但仍建议您查阅本目
+    录下的 Firebird-2000 以获得更多信息。
+
+    以下开始安装步骤：
+
+    0. 获取 FB2000v0918.tar.gz ，放在 /tmp 目录下
+
+    1. 用 root 的身份执行： groupadd -g 999 bbs
+       这个操作是为您的 BBS 创建一个系统的组( GROUP )
+
+    2. 用 root 的身份执行： adduser -u 9999 -g bbs bbs
+       这个操作是为您的 BBS 创建一个系统的帐号( USER ) 
+
+    3. 用 root 的身份执行： passwd bbs
+       这个操作是为 bbs 这个帐号设定密码，这个密码不要让别人知道
+
+    4. 用 root 的身份执行： mkdir /home/bbssrc
+       这个操作是建立一个存放您的 BBS 源代码的目录
+
+    5. 用 root 的身份执行： mkdir /home/bbs
+       这个操作是建立一个存放您的 BBS 数据的目录
+
+    6. 用 root 的身份执行： chown bbs.bbs bbs bbssrc
+       这个操作是让 /home/bbs 和 /home/bbssrc 目录属于 bbs 帐号
+
+    7. 以 bbs 的身份依序(一步一步)执行下列命令：
+        $ cd /home
+        $ tar -zxvf /tmp/FB2000v0918.tar.gz
+        $ cd bbssrc
+        $ ./configure
+	$ make
+	$ make install
+	$ /home/bbs/bin/bbsd 2000
+
+    8. telnet locahost 2000 ，顺利的话，您将会看到 BBS 的欢迎画面，
+       这时请输入 new 建立 SYSOP 的帐号。请注意！SYSOP 五个字母都
+       要大写。然后您就根据系统的提示输入相应的信息。
+
+    9. 用同样的方式建立 guest 帐号，使得别人可以用 guest 登陆您的
+       站点。
+
+    10. 这时，您的 BBS 已经安装成功了，您可以召集您的朋友们来一起
+        建设您的 BBS 了！ 恭喜您！

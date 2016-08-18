@@ -1,0 +1,16 @@
+[00README]
+
+本目录存放 FB2000 相关文件，请详细阅读各文件再安装系统。
+
+本目录档案内容说明：
+
+	Firebird-2000		FB2000 完整安装手册
+	FB2000_Thankyou		感谢支援 FB2000 的朋友
+	FB2000_Core_Team	FB2000 开发小组成员
+	FB2000_Quick_Install	FB2000 快速安装指南
+	Install_MY_BBS		安装私人 BBS 快速指南
+	Update_To_FB2000	升级到 FB2000 专业指南
+	OLD.ChangeLog		FB 3.0 19991003 SNAP 的 ChangeLog
+	Admin_Manual		管理者参考手册
+	example/		BBS 相关设定范例档
+

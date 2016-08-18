@@ -1,0 +1,1076 @@
+20000324
+ - Released 1.2.3
+
+20000317
+ - Clarified --with-default-path option.
+ - Added -blibpath handling for AIX to work around stupid runtime linking.
+   Problem elucidated by gshapiro@SENDMAIL.ORG by way of Jim Knoble
+   <jmknoble@pobox.com>
+ - Checks for 64 bit int types. Problem report from Mats Fredholm
+   <matsf@init.se>
+ - OpenBSD CVS updates:
+   - [atomicio.c auth-krb4.c bufaux.c channels.c compress.c fingerprint.c] 
+     [packet.h radix.c rsa.c scp.c ssh-agent.c ssh-keygen.c sshconnect.c]
+     [sshd.c]
+     pedantic: signed vs. unsigned, void*-arithm, etc
+   - [ssh.1 sshd.8]
+     Various cleanups and standardizations.
+ - Runtime error fix for HPUX from Otmar Stahl 
+   <O.Stahl@lsw.uni-heidelberg.de>
+
+20000316
+ - Fixed configure not passing LDFLAGS to Solaris. Report from David G. 
+   Hesprich <dghespri@sprintparanet.com>
+ - Propogate LD through to Makefile
+ - Doc cleanups
+ - Added blurb about "scp: command not found" errors to UPGRADING
+
+20000315
+ - Fix broken CFLAGS handling during search for OpenSSL. Fixes va_list
+   problems with gcc/Solaris.
+ - Don't free argument to putenv() after use (in setenv() replacement). 
+   Report from Seigo Tanimura <tanimura@r.dl.itc.u-tokyo.ac.jp>
+ - Created contrib/ subdirectory. Included helpers from Phil Hands' 
+   Debian package, README file and chroot patch from Ricardo Cerqueira
+   <rmcc@clix.pt>
+ - Moved gnome-ssh-askpass.c to contrib directory and removed config 
+   option.
+ - Slight cleanup to doc files
+ - Configure fix from Bratislav ILICH <bilic@zepter.ru>
+
+20000314
+ - Include macro for IN6_IS_ADDR_V4MAPPED. Report from 
+   peter@frontierflying.com
+ - Include /usr/local/include and /usr/local/lib for systems that don't
+   do it themselves
+ - -R/usr/local/lib for Solaris
+ - Fix RSAref detection
+ - Fix IN6_IS_ADDR_V4MAPPED macro
+
+20000311
+ - Detect RSAref
+ - OpenBSD CVS change
+   [sshd.c]
+    - disallow guessing of root password
+ - More configure fixes
+ - IPv6 workarounds from Hideaki YOSHIFUJI <yoshfuji@ecei.tohoku.ac.jp>
+
+20000309
+ - OpenBSD CVS updates to v1.2.3
+	[ssh.h atomicio.c]
+	 - int atomicio -> ssize_t (for alpha). ok deraadt@
+	[auth-rsa.c]
+	 - delay MD5 computation until client sends response, free() early, cleanup.
+	[cipher.c]
+	 - void* -> unsigned char*, ok niels@
+	[hostfile.c]
+	 - remove unused variable 'len'. fix comments.
+	 - remove unused variable
+	[log-client.c log-server.c]
+	 - rename a cpp symbol, to avoid param.h collision
+	[packet.c]
+	 - missing xfree()
+	 - getsockname() requires initialized tolen; andy@guildsoftware.com
+	 - use getpeername() in packet_connection_is_on_socket(), fixes sshd -i;
+	from Holger.Trapp@Informatik.TU-Chemnitz.DE
+	[pty.c pty.h]
+	 - register cleanup for pty earlier. move code for pty-owner handling to 
+   	pty.c ok provos@, dugsong@
+	[readconf.c]
+	 - turn off x11-fwd for the client, too.
+	[rsa.c]
+	 - PKCS#1 padding
+	[scp.c]
+	 - allow '.' in usernames; from jedgar@fxp.org
+	[servconf.c]
+	 - typo: ignore_user_known_hosts int->flag; naddy@mips.rhein-neckar.de
+	 - sync with sshd_config
+	[ssh-keygen.c]
+	 - enable ssh-keygen -l -f ~/.ssh/known_hosts, ok deraadt@
+	[ssh.1]
+	 - Change invalid 'CHAT' loglevel to 'VERBOSE'
+	[ssh.c]
+	 - suppress AAAA query host when '-4' is used; from shin@nd.net.fujitsu.co.jp
+	 - turn off x11-fwd for the client, too.
+	[sshconnect.c]
+	 - missing xfree()
+	 - retry rresvport_af(), too. from sumikawa@ebina.hitachi.co.jp.
+	 - read error vs. "Connection closed by remote host"
+	[sshd.8]
+	 - ie. -> i.e.,
+	 - do not link to a commercial page..
+	 - sync with sshd_config
+	[sshd.c]
+	 - no need for poll.h; from bright@wintelcom.net
+	 - log with level log() not fatal() if peer behaves badly.
+	 - don't panic if client behaves strange. ok deraadt@
+	 - make no-port-forwarding for RSA keys deny both -L and -R style fwding
+	 - delay close() of pty until the pty has been chowned back to root
+	 - oops, fix comment, too.
+	 - missing xfree()
+	 - move XAUTHORITY to subdir. ok dugsong@. fixes debian bug #57907, too.
+   	(http://cgi.debian.org/cgi-bin/bugreport.cgi?archive=no&bug=57907)
+	 - register cleanup for pty earlier. move code for pty-owner handling to 
+      pty.c ok provos@, dugsong@
+	 - create x11 cookie file
+	 - fix pr 1113, fclose() -> pclose(), todo: remote popen()
+	 - version 1.2.3
+ - Cleaned up
+ - Removed warning workaround for Linux and devpts filesystems (no longer 
+   required after OpenBSD updates)
+
+20000308
+ - Configure fix from Hiroshi Takekawa <takekawa@sr3.t.u-tokyo.ac.jp>
+
+20000307
+ - Released 1.2.2p1
+
+20000305
+ - Fix DEC compile fix
+ - Explicitly seed OpenSSL's PRNG before checking rsa_alive()
+ - Check for getpagesize in libucb.a if not found in libc. Fix for old
+   Solaris from Andre Lucas <andre.lucas@dial.pipex.com>
+ - Check for libwrap if --with-tcp-wrappers option specified. Suggestion 
+   Mate Wierdl <mw@moni.msci.memphis.edu>
+
+20000303
+ - Added "make host-key" target, Suggestion from Dominik Brettnacher
+ <domi@saargate.de>
+ - Don't permanently fail on bind() if getaddrinfo has more choices left for 
+   us. Needed to work around messy IPv6 on Linux. Patch from Arkadiusz
+   Miskiewicz <misiek@pld.org.pl>
+ - DEC Unix compile fix from David Del Piero <David.DelPiero@qed.qld.gov.au>
+ - Manpage fix from David Del Piero <David.DelPiero@qed.qld.gov.au>
+
+20000302
+ - Big cleanup of autoconf code
+   - Rearranged to be a little more logical
+   - Added -R option for Solaris
+   - Rewrote OpenSSL detection code. Now uses AC_TRY_RUN with a test program
+     to detect library and header location _and_ ensure library has proper
+     RSA support built in (this is a problem with OpenSSL 0.9.5).
+ - Applied pty cleanup patch from markus.friedl@informatik.uni-erlangen.de
+ - Avoid warning message with Unix98 ptys
+ - Warning was valid - possible race condition on PTYs. Avoided using 
+   platform-specific code.
+ - Document some common problems
+ - Allow root access to any key. Patch from 
+   markus.friedl@informatik.uni-erlangen.de
+
+20000207
+ - Removed SOCKS code. Will support through a ProxyCommand.
+
+20000203
+ - Fixed SEGVs in authloop, fix from vbzoli@hbrt.hu
+ - Add --with-ssl-dir option
+
+20000202
+ - Fix lastlog code for directory based lastlogs. Fix from Josh Durham 
+   <jmd@aoe.vt.edu>
+ - Documentation fixes from HARUYAMA Seigo <haruyama@nt.phys.s.u-tokyo.ac.jp>
+ - Added URLs to Japanese translations of documents by HARUYAMA Seigo 
+   <haruyama@nt.phys.s.u-tokyo.ac.jp>
+
+20000201
+ - Use socket pairs by default (instead of pipes). Prevents race condition
+   on several (buggy) OSs. Report and fix from tridge@linuxcare.com
+
+20000127
+ - Seed OpenSSL's random number generator before generating RSA keypairs
+ - Split random collector into seperate file
+ - Compile fix from Andre Lucas <andre.lucas@dial.pipex.com>
+
+20000126
+ - Released 1.2.2 stable
+
+ - NeXT keeps it lastlog in /usr/adm. Report from 
+   mouring@newton.pconline.com
+ - Added note in UPGRADING re interop with commercial SSH using idea. 
+   Report from Jim Knoble <jmknoble@pobox.com>
+ - Fix linking order for Kerberos/AFS. Fix from Holget Trapp
+   <Holger.Trapp@Informatik.TU-Chemnitz.DE>
+
+20000125
+ - Fix NULL pointer dereference in login.c. Fix from Andre Lucas 
+   <andre.lucas@dial.pipex.com>
+ - Reorder PAM initialisation so it does not mess up lastlog. Reported
+   by Andre Lucas <andre.lucas@dial.pipex.com>
+ - Use preformatted manpages on SCO, report from Gary E. Miller 
+   <gem@rellim.com>
+ - New URL for x11-ssh-askpass.
+ - Fixpaths was missing /etc/ssh_known_hosts. Report from Jim Knoble 
+   <jmknoble@pobox.com>
+ - Added 'DESTDIR' option to Makefile to ease package building. Patch from 
+   Jim Knoble <jmknoble@pobox.com>
+ - Updated RPM spec files to use DESTDIR
+
+20000124
+ - Pick up version 1.2.2 from OpenBSD CVS (no changes, just version number
+   increment)
+
+20000123
+ - OpenBSD CVS:
+   - [packet.c]
+     getsockname() requires initialized tolen; andy@guildsoftware.com
+ - AIX patch from Matt Richards <v2matt@btv.ibm.com> and David Rankin 
+   <drankin@bohemians.lexington.ky.us>
+ - Fix lastlog support, patch from Andre Lucas <andre.lucas@dial.pipex.com>
+
+20000122
+ - Fix compilation of bsd-snprintf.c on Solaris, fix from Ben Taylor
+   <bent@clark.net>
+ - Merge preformatted manpage patch from Andre Lucas
+   <andre.lucas@dial.pipex.com>
+ - Make IPv4 use the default in RPM packages
+ - Irix uses preformatted manpages
+ - Missing htons() in bsd-bindresvport.c, fix from Holger Trapp
+   <Holger.Trapp@Informatik.TU-Chemnitz.DE>
+ - OpenBSD CVS updates:
+   - [packet.c]
+     use getpeername() in packet_connection_is_on_socket(), fixes sshd -i;
+     from Holger.Trapp@Informatik.TU-Chemnitz.DE
+   - [sshd.c]
+     log with level log() not fatal() if peer behaves badly.
+   - [readpass.c]
+     instead of blocking SIGINT, catch it ourselves, so that we can clean 
+     the tty modes up and kill ourselves -- instead of our process group 
+     leader (scp, cvs, ...) going away and leaving us in noecho mode.  
+     people with cbreak shells never even noticed..
+   - [ssh-add.1 ssh-agent.1 ssh-keygen.1 ssh.1 sshd.8]
+     ie. -> i.e.,
+
+20000120
+ - Don't use getaddrinfo on AIX
+ - Update to latest OpenBSD CVS:
+   - [auth-rsa.c]
+     - fix user/1056, sshd keeps restrictions; dbt@meat.net
+   - [sshconnect.c]
+     - disable agent fwding for proto 1.3, remove abuse of auth-rsa flags.
+     - destroy keys earlier
+     - split key exchange (kex) and user authentication (user-auth), 
+       ok: provos@
+   - [sshd.c]
+     - no need for poll.h; from bright@wintelcom.net
+     - disable agent fwding for proto 1.3, remove abuse of auth-rsa flags.
+     - split key exchange (kex) and user authentication (user-auth), 
+       ok: provos@
+ - Big manpage and config file cleanup from Andre Lucas
+   <andre.lucas@dial.pipex.com>
+   - Re-added latest (unmodified) OpenBSD manpages
+ - Doc updates
+ - NetBSD patch from David Rankin <drankin@bohemians.lexington.ky.us> and
+   Christos Zoulas <christos@netbsd.org>
+
+20000119
+ - SCO compile fixes from Gary E. Miller <gem@rellim.com>
+ - Compile fix from Darren_Hall@progressive.com
+ - Linux/glibc-2.1.2 takes a *long* time to look up names for AF_UNSPEC
+   addresses using getaddrinfo(). Added a configure switch to make the
+   default lookup mode AF_INET
+
+20000118
+ - Fixed --with-pid-dir option
+ - Makefile fix from Gary E. Miller <gem@rellim.com>
+ - Compile fix for HPUX and Solaris from Andre Lucas    
+   <andre.lucas@dial.pipex.com>
+
+20000117
+ - Clean up bsd-bindresvport.c. Use arc4random() for picking initial
+   port, ignore EINVAL errors (Linux) when searching for free port.
+ - Revert __snprintf -> snprintf aliasing. Apparently Solaris 
+   __snprintf isn't. Report from Theo de Raadt <theo@cvs.openbsd.org>
+ - Document location of Redhat PAM file in INSTALL.
+ - Fixed X11 forwarding bug on Linux. libc advertises AF_INET6 
+   INADDR_ANY_INIT addresses via getaddrinfo, but may not be able to 
+   deliver (no IPv6 kernel support)
+ - Released 1.2.1pre27
+
+ - Fix rresvport_af failure errors (logic error in bsd-bindresvport.c)
+ - Fix --with-ipaddr-display option test. Fix from Jarno Huuskonen 
+   <jhuuskon@hytti.uku.fi>
+ - Fix hang on logout if processes are still using the pty. Needs 
+   further testing.
+ - Patch from Christos Zoulas <christos@zoulas.com>
+   - Try $prefix first when looking for OpenSSL.
+   - Include sys/types.h when including sys/socket.h in test programs
+ - Substitute PID directory in sshd.8. Suggestion from Andrew 
+   Stribblehill <a.d.stribblehill@durham.ac.uk>
+
+20000116
+ - Renamed --with-xauth-path to --with-xauth
+ - Added --with-pid-dir option
+ - Released 1.2.1pre26
+
+ - Compilation fix from Kiyokazu SUTO <suto@ks-and-ks.ne.jp>
+ - Fixed broken bugfix for /dev/ptmx on Linux systems which lack 
+   openpty(). Report from Kiyokazu SUTO <suto@ks-and-ks.ne.jp>
+
+20000115
+ - Add --with-xauth-path configure directive and explicit test for
+   /usr/openwin/bin/xauth for Solaris systems. Report from Anders 
+   Nordby <anders@fix.no>
+ - Fix incorrect detection of /dev/ptmx on Linux systems that lack 
+   openpty. Report from John Seifarth <john@waw.be>
+ - Look for intXX_t and u_intXX_t in sys/bitypes.h if they are not in
+   sys/types.h. Fixes problems on SCO, report from Gary E. Miller 
+   <gem@rellim.com>
+ - Use __snprintf and __vnsprintf if they are found where snprintf and
+   vnsprintf are lacking. Suggested by Ben Taylor <bent@shell.clark.net>
+   and others.
+
+20000114
+ - Merged OpenBSD IPv6 patch:
+   - [sshd.c sshd.8 sshconnect.c ssh.h ssh.c servconf.h servconf.c scp.1]
+     [scp.c packet.h packet.c login.c log.c canohost.c channels.c]
+     [hostfile.c sshd_config]
+     ipv6 support: mostly gethostbyname->getaddrinfo/getnameinfo, new
+     features: sshd allows multiple ListenAddress and Port options. note 
+     that libwrap is not IPv6-ready. (based on patches from 
+     fujiwara@rcac.tdi.co.jp)
+   - [ssh.c canohost.c]
+     more hints (hints.ai_socktype=SOCK_STREAM) for getaddrinfo, 
+     from itojun@
+   - [channels.c]
+     listen on _all_ interfaces for X11-Fwd (hints.ai_flags = AI_PASSIVE)
+   - [packet.h]
+     allow auth-kerberos for IPv4 only
+   - [scp.1 sshd.8 servconf.h scp.c]
+     document -4, -6, and 'ssh -L 2022/::1/22'
+   - [ssh.c]
+     'ssh @host' is illegal (null user name), from 
+     karsten@gedankenpolizei.de
+   - [sshconnect.c]
+     better error message
+   - [sshd.c]
+     allow auth-kerberos for IPv4 only
+ - Big IPv6 merge:
+   - Cleanup overrun in sockaddr copying on RHL 6.1
+   - Replacements for getaddrinfo, getnameinfo, etc based on versions
+     from patch from KIKUCHI Takahiro <kick@kyoto.wide.ad.jp>
+   - Replacement for missing structures on systems that lack IPv6
+   - record_login needed to know about AF_INET6 addresses
+   - Borrowed more code from OpenBSD: rresvport_af and requisites
+
+20000110
+ - Fixes to auth-skey to enable it to use the standard OpenSSL libraries
+
+20000107
+ - New config.sub and config.guess to fix problems on SCO. Supplied
+   by Gary E. Miller <gem@rellim.com>
+ - SCO build fix from Gary E. Miller <gem@rellim.com>
+ - Released 1.2.1pre25
+
+20000106
+ - Documentation update & cleanup
+ - Better KrbIV / AFS detection, based on patch from:
+   Holger Trapp <Holger.Trapp@Informatik.TU-Chemnitz.DE>
+
+20000105
+ - Fixed annoying DES corruption problem. libcrypt has been 
+   overriding symbols in libcrypto. Removed libcrypt and crypt.h
+   altogether (libcrypto includes its own crypt(1) replacement)
+ - Added platform-specific rules for Irix 6.x. Included warning that
+   they are untested.
+
+20000103
+ - Add explicit make rules for files proccessed by fixpaths.
+ - Fix "make install" in RPM spec files. Report from Tenkou N. Hattori  
+   <tnh@kondara.org>
+ - Removed "nullok" directive from default PAM configuration files. 
+   Added information on enabling EmptyPasswords on openssh+PAM in 
+   UPGRADING file.
+ - OpenBSD CVS updates
+   - [ssh-agent.c]
+     cleanup_exit() for SIGTERM/SIGHUP, too. from fgsch@ and 
+     dgaudet@arctic.org
+   - [sshconnect.c]
+     compare correct version for 1.3 compat mode
+
+20000102
+ - Prevent multiple inclusion of config.h and defines.h. Suggested
+   by Andre Lucas <andre.lucas@dial.pipex.com>
+ - Properly clean up on exit of ssh-agent. Patch from Dean Gaudet
+   <dgaudet@arctic.org>
+
+19991231
+ - Fix password support on systems with a mixture of shadowed and 
+   non-shadowed passwords (e.g. NIS). Report and fix from 
+   HARUYAMA Seigo <haruyama@nt.phys.s.u-tokyo.ac.jp>
+ - Fix broken autoconf typedef detection. Report from Marc G. 
+   Fournier <marc.fournier@acadiau.ca>
+ - Fix occasional crash on LinuxPPC. Patch from Franz Sirl
+   <Franz.Sirl-kernel@lauterbach.com>
+ - Prevent typedefs from being compiled more than once. Report from 
+   Marc G. Fournier <marc.fournier@acadiau.ca>
+ - Fill in ut_utaddr utmp field. Report from Benjamin Charron
+   <iretd@bigfoot.com>
+ - Really fix broken default path. Fix from Jim Knoble 
+   <jmknoble@pobox.com>
+ - Remove test for quad_t. No longer needed.
+ - Released 1.2.1pre24
+
+ - Added support for directory-based lastlogs
+ - Really fix typedefs, patch from Ben Taylor <bent@clark.net>
+
+19991230
+ - OpenBSD CVS updates:
+   - [auth-passwd.c]
+     check for NULL 1st
+ - Removed most of the pam code into its own file auth-pam.[ch]. This 
+   cleaned up sshd.c up significantly.
+ - PAM authentication was incorrectly interpreting 
+   "PermitRootLogin without-password". Report from Matthias Andree
+   <ma@dt.e-technik.uni-dortmund.de
+ - Several other cleanups
+ - Merged Dante SOCKS support patch from David Rankin
+  <drankin@bohemians.lexington.ky.us>
+ - Updated documentation with ./configure options
+ - Released 1.2.1pre23
+
+19991229
+ - Applied another NetBSD portability patch from David Rankin 
+   <drankin@bohemians.lexington.ky.us>
+ - Fix --with-default-path option.
+ - Autodetect perl, patch from David Rankin 
+   <drankin@bohemians.lexington.ky.us>
+ - Print whether OpenSSH was compiled with RSARef, patch from 
+   Nalin Dahyabhai <nalin@thermo.stat.ncsu.edu>
+ - Calls to pam_setcred, patch from Nalin Dahyabhai 
+   <nalin@thermo.stat.ncsu.edu>
+ - Detect missing size_t and typedef it.
+ - Rename helper.[ch] to (more appropriate) bsd-misc.[ch]
+ - Minor Makefile cleaning
+
+19991228
+ - Replacement for getpagesize() for systems which lack it
+ - NetBSD login.c compile fix from David Rankin 
+  <drankin@bohemians.lexington.ky.us>
+ - Fully set ut_tv if present in utmp or utmpx
+ - Portability fixes for Irix 5.3 (now compiles OK!)
+ - autoconf and other misc cleanups
+ - Merged AIX patch from Darren Hall <dhall@virage.org>
+ - Cleaned up defines.h
+ - Released 1.2.1pre22
+
+19991227
+ - Automatically correct paths in manpages and configuration files. Patch
+   and script from Andre Lucas <andre.lucas@dial.pipex.com>
+ - Removed credits from README to CREDITS file, updated.
+ - Added --with-default-path to specify custom path for server
+ - Removed #ifdef trickery from acconfig.h into defines.h
+ - PAM bugfix. PermitEmptyPassword was being ignored.
+ - Fixed PAM config files to allow empty passwords if server does.
+ - Explained spurious PAM auth warning workaround in UPGRADING
+ - Use last few chars of tty line as ut_id
+ - New SuSE RPM spec file from Chris Saia <csaia@wtower.com>
+ - OpenBSD CVS updates:
+   - [packet.h auth-rhosts.c]
+     check format string for packet_disconnect and packet_send_debug, too
+   - [channels.c]
+     use packet_get_maxsize for channels. consistence.
+
+19991226
+ - Enabled utmpx support by default for Solaris
+ - Cleanup sshd.c PAM a little more
+ - Revised RPM package to include Jim Knoble's <jmknoble@pobox.com>
+   X11 ssh-askpass program.
+ - Disable logging of PAM success and failures, PAM is verbose enough.
+   Unfortunatly there is currently no way to disable auth failure 
+   messages. Mention this in UPGRADING file and sent message to PAM 
+   developers
+ - OpenBSD CVS update:
+   - [ssh-keygen.1 ssh.1]
+     remove ref to .ssh/random_seed, mention .ssh/environment in 
+     .Sh FILES, too
+ - Released 1.2.1pre21
+ - Fixed implicit '.' in default path, report from Jim Knoble 
+   <jmknoble@pobox.com>
+ - Redhat RPM spec fixes from Jim Knoble <jmknoble@pobox.com>
+
+19991225
+ - More fixes from Andre Lucas <andre.lucas@dial.pipex.com>
+ - Cleanup of auth-passwd.c for shadow and MD5 passwords
+ - Cleanup and bugfix of PAM authentication code
+ - Released 1.2.1pre20
+
+ - Merged fixes from Ben Taylor <bent@clark.net>
+ - Fixed configure support for PAM. Reported by Naz <96na@eng.cam.ac.uk>
+ - Disabled logging of PAM password authentication failures when password
+   is empty. (e.g start of authentication loop). Reported by Naz
+   <96na@eng.cam.ac.uk>)
+
+19991223
+ - Merged later HPUX patch from Andre Lucas 
+   <andre.lucas@dial.pipex.com>
+ - Above patch included better utmpx support from Ben Taylor
+   <bent@clark.net>
+
+19991222
+ - Fix undefined fd_set type in ssh.h from Povl H. Pedersen 
+   <pope@netguide.dk>
+ - Fix login.c breakage on systems which lack ut_host in struct
+   utmp. Reported by Willard Dawson <willard.dawson@sbs.siemens.com>
+
+19991221
+ - Integration of large HPUX patch from Andre Lucas 
+   <andre.lucas@dial.pipex.com>. Integrating it had a few other 
+   benefits:
+   - Ability to disable shadow passwords at configure time
+   - Ability to disable lastlog support at configure time
+   - Support for IP address in $DISPLAY
+ - OpenBSD CVS update:
+   - [sshconnect.c]
+   say "REMOTE HOST IDENTIFICATION HAS CHANGED"
+ - Fix DISABLE_SHADOW support
+ - Allow MD5 passwords even if shadow passwords are disabled
+ - Release 1.2.1pre19
+
+19991218
+ - Redhat init script patch from Chun-Chung Chen 
+   <cjj@u.washington.edu>
+ - Avoid breakage on systems without IPv6 headers
+
+19991216
+ - Makefile changes for Solaris from Peter Kocks 
+   <peter.kocks@baygate.com>
+ - Minor updates to docs
+ - Merged OpenBSD CVS changes:
+   - [authfd.c ssh-agent.c]
+     keysize warnings talk about identity files
+   - [packet.c]
+     "Connection closed by x.x.x.x": fatal() -> log()
+ - Correctly handle empty passwords in shadow file. Patch from: 
+   "Chris, the Young One" <cky@pobox.com>
+ - Released 1.2.1pre18
+
+19991215
+ - Integrated patchs from Juergen Keil <jk@tools.de>
+   - Avoid void* pointer arithmatic
+   - Use LDFLAGS correctly
+   - Fix SIGIO error in scp
+   - Simplify status line printing in scp
+ - Added better test for inline functions compiler support from  
+   Darren_Hall@progressive.com
+
+19991214
+ - OpenBSD CVS Changes
+   - [canohost.c]
+     fix get_remote_port() and friends for sshd -i; 
+     Holger.Trapp@Informatik.TU-Chemnitz.DE
+   - [mpaux.c]
+     make code simpler. no need for memcpy. niels@ ok
+   - [pty.c]
+     namebuflen not sizeof namebuflen; bnd@ep-ag.com via djm@mindrot.org
+     fix proto; markus
+   - [ssh.1]
+      typo; mark.baushke@solipsa.com
+   - [channels.c ssh.c ssh.h sshd.c]
+     type conflict for 'extern Type *options' in channels.c; dot@dotat.at
+   - [sshconnect.c]
+     move checking of hostkey into own function.
+   - [version.h]
+     OpenSSH-1.2.1
+ - Clean up broken includes in pty.c
+ - Some older systems don't have poll.h, they use sys/poll.h instead
+ - Doc updates
+
+19991211
+ - Fix compilation on systems with AFS. Reported by 
+   aloomis@glue.umd.edu
+ - Fix installation on Solaris. Reported by 
+   Gordon Rowell <gordonr@gormand.com.au>
+ - Fix gccisms (__attribute__ and inline). Report by edgy@us.ibm.com,
+   patch from Markus Friedl <markus.friedl@informatik.uni-erlangen.de>
+ - Auto-locate xauth. Patch from David Agraz <dagraz@jahoopa.com>
+ - Compile fix from David Agraz <dagraz@jahoopa.com>
+ - Avoid compiler warning in bsd-snprintf.c
+ - Added pam_limits.so to default PAM config. Suggested by 
+   Jim Knoble <jmknoble@pobox.com>
+
+19991209
+ - Import of patch from Ben Taylor <bent@clark.net>:
+   - Improved PAM support
+   - "uninstall" rule for Makefile
+   - utmpx support
+   - Should fix PAM problems on Solaris
+ - OpenBSD CVS updates:
+   - [readpass.c]
+     avoid stdio; based on work by markus, millert, and I
+   - [sshd.c]
+     make sure the client selects a supported cipher
+   - [sshd.c]
+     fix sighup handling.  accept would just restart and daemon handled 
+     sighup only after the next connection was accepted. use poll on 
+     listen sock now.
+   - [sshd.c]
+     make that a fatal
+ - Applied patch from David Rankin <drankin@bohemians.lexington.ky.us>
+   to fix libwrap support on NetBSD
+ - Released 1.2pre17
+
+19991208
+ - Compile fix for Solaris with /dev/ptmx from 
+   David Agraz <dagraz@jahoopa.com>
+
+19991207
+ - sshd Redhat init script patch from Jim Knoble <jmknoble@pobox.com>
+   fixes compatability with 4.x and 5.x
+ - Fixed default SSH_ASKPASS
+ - Fix PAM account and session being called multiple times. Problem 
+   reported by Adrian Baugh <adrian@merlin.keble.ox.ac.uk>
+ - Merged more OpenBSD changes:
+   - [atomicio.c authfd.c scp.c serverloop.c ssh.h sshconnect.c sshd.c]
+     move atomicio into it's own file.  wrap all socket write()s which 
+     were doing write(sock, buf, len) != len, with atomicio() calls.
+   - [auth-skey.c]
+     fd leak
+   - [authfile.c]
+     properly name fd variable
+   - [channels.c]
+     display great hatred towards strcpy
+   - [pty.c pty.h sshd.c]
+     use openpty() if it exists (it does on BSD4_4)
+   - [tildexpand.c]
+     check for ~ expansion past MAXPATHLEN
+ - Modified helper.c to use new atomicio function.
+ - Reformat Makefile a little
+ - Moved RC4 routines from rc4.[ch] into helper.c
+ - Added autoconf code to detect /dev/ptmx (Solaris) and /dev/ptc (AIX)
+ - Updated SuSE spec from Chris Saia <csaia@wtower.com>
+ - Tweaked Redhat spec
+ - Clean up bad imports of a few files (forgot -kb)
+ - Released 1.2pre16
+
+19991204
+ - Small cleanup of PAM code in sshd.c
+ - Merged OpenBSD CVS changes:
+   - [auth-krb4.c auth-passwd.c auth-skey.c ssh.h]
+     move skey-auth from auth-passwd.c to auth-skey.c, same for krb4
+   - [auth-rsa.c]
+     warn only about mismatch if key is _used_
+     warn about keysize-mismatch with log() not error()
+     channels.c readconf.c readconf.h ssh.c ssh.h sshconnect.c
+     ports are u_short
+   - [hostfile.c]
+     indent, shorter warning
+   - [nchan.c]
+     use error() for internal errors
+   - [packet.c]
+     set loglevel for SSH_MSG_DISCONNECT to log(), not fatal()
+     serverloop.c
+     indent
+   - [ssh-add.1 ssh-add.c ssh.h]
+     document $SSH_ASKPASS, reasonable default
+   - [ssh.1]
+     CheckHostIP is not available for connects via proxy command
+   - [sshconnect.c]
+     typo
+     easier to read client code for passwd and skey auth
+     turn of checkhostip for proxy connects, since we don't know the remote ip
+
+19991126
+ - Add definition for __P()
+ - Added [v]snprintf() replacement for systems that lack it
+
+19991125
+ - More reformatting merged from OpenBSD CVS
+ - Merged OpenBSD CVS changes:
+   - [channels.c]
+     fix packet_integrity_check() for !have_hostname_in_open.
+     report from mrwizard@psu.edu via djm@ibs.com.au
+   - [channels.c]
+     set SO_REUSEADDR and SO_LINGER for forwarded ports.
+     chip@valinux.com via damien@ibs.com.au
+   - [nchan.c]
+     it's not an error() if shutdown_write failes in nchan.
+   - [readconf.c]
+     remove dead #ifdef-0-code
+   - [readconf.c servconf.c]
+     strcasecmp instead of tolower
+   - [scp.c]
+     progress meter overflow fix from damien@ibs.com.au
+   - [ssh-add.1 ssh-add.c]
+     SSH_ASKPASS support
+   - [ssh.1 ssh.c]
+     postpone fork_after_authentication until command execution,
+     request/patch from jahakala@cc.jyu.fi via damien@ibs.com.au
+     plus: use daemon() for backgrounding
+ - Added BSD compatible install program and autoconf test, thanks to
+   Niels Kristian Bech Jensen <nkbj@image.dk>
+ - Solaris fixing, thanks to Ben Taylor <bent@clark.net>
+ - Merged beginnings of AIX support from Tor-Ake Fransson <torake@hotmail.com>
+ - Release 1.2pre15
+
+19991124
+ - Merged very large OpenBSD source code reformat
+ - OpenBSD CVS updates
+   - [channels.c cipher.c compat.c log-client.c scp.c serverloop.c]
+     [ssh.h sshd.8 sshd.c]
+     syslog changes:
+     * Unified Logmessage for all auth-types, for success and for failed
+     * Standard connections get only ONE line in the LOG when level==LOG:
+       Auth-attempts are logged only, if authentication is:
+          a) successfull or
+          b) with passwd or
+          c) we had more than AUTH_FAIL_LOG failues
+     * many log() became verbose()
+     * old behaviour with level=VERBOSE
+   - [readconf.c readconf.h ssh.1 ssh.h sshconnect.c sshd.c]
+     tranfer s/key challenge/response data in SSH_SMSG_AUTH_TIS_CHALLENGE
+     messages. allows use of s/key in windows (ttssh, securecrt) and
+     ssh-1.2.27 clients without 'ssh -v', ok: niels@
+   - [sshd.8]
+     -V, for fallback to openssh in SSH2 compatibility mode
+   - [sshd.c]
+     fix sigchld race; cjc5@po.cwru.edu
+
+19991123
+ - Added SuSE package files from Chris Saia <csaia@wtower.com>
+ - Restructured package-related files under packages/*
+ - Added generic PAM config
+ - Numerous little Solaris fixes
+ - Add recommendation to use GNU make to INSTALL document
+
+19991122
+ - Make <enter> close gnome-ssh-askpass (Debian bug #50299)
+ - OpenBSD CVS Changes
+   - [ssh-keygen.c] 
+     don't create ~/.ssh only if the user wants to store the private 
+     key there. show fingerprint instead of public-key after 
+     keygeneration. ok niels@
+ - Added OpenBSD bsd-strlcat.c, created bsd-strlcat.h
+ - Added timersub() macro
+ - Tidy RCSIDs of bsd-*.c
+ - Added autoconf test and macro to deal with old PAM libraries 
+   pam_strerror definition (one arg vs two).
+ - Fix EGD problems (Thanks to Ben Taylor <bent@clark.net>)
+ - Retry /dev/urandom reads interrupted by signal (report from 
+   Robert Hardy <rhardy@webcon.net>)
+ - Added a setenv replacement for systems which lack it
+ - Only display public key comment when presenting ssh-askpass dialog
+ - Released 1.2pre14
+
+ - Configure, Make and changelog corrections from Tudor Bosman 
+   <tudorb@jm.nu> and Niels Kristian Bech Jensen <nkbj@image.dk>
+
+19991121
+ - OpenBSD CVS Changes:
+   - [channels.c]
+     make this compile, bad markus
+   - [log.c readconf.c servconf.c ssh.h]
+     bugfix: loglevels are per host in clientconfig,
+     factor out common log-level parsing code.
+   - [servconf.c]
+     remove unused index (-Wall)
+   - [ssh-agent.c]
+     only one 'extern char *__progname'
+   - [sshd.8]
+     document SIGHUP, -Q to synopsis
+   - [sshconnect.c serverloop.c sshd.c packet.c packet.h]
+     [channels.c clientloop.c]
+     SSH_CMSG_MAX_PACKET_SIZE, some clients use this, some need this, niels@
+     [hope this time my ISP stays alive during commit]
+   - [OVERVIEW README] typos; green@freebsd
+   - [ssh-keygen.c]
+     replace xstrdup+strcat with strlcat+fixed buffer, fixes OF (bad me)
+     exit if writing the key fails (no infinit loop)
+     print usage() everytime we get bad options
+   - [ssh-keygen.c] overflow, djm@mindrot.org
+   - [sshd.c] fix sigchld race; cjc5@po.cwru.edu
+     
+19991120
+ - Merged more Solaris support from Marc G. Fournier 
+   <marc.fournier@acadiau.ca>
+ - Wrote autoconf tests for integer bit-types
+ - Fixed enabling kerberos support
+ - Fix segfault in ssh-keygen caused by buffer overrun in filename 
+   handling.
+
+19991119
+ - Merged PAM buffer overrun patch from Chip Salzenberg <chip@valinux.com>
+ - Merged OpenBSD CVS changes
+   - [auth-rhosts.c auth-rsa.c ssh-agent.c sshconnect.c sshd.c]
+     more %d vs. %s in fmt-strings
+   - [authfd.c]
+     Integers should not be printed with %s
+ - EGD uses a socket, not a named pipe. Duh.
+ - Fix includes in fingerprint.c
+ - Fix scp progress bar bug again.
+ - Move ssh-askpass from ${libdir}/ssh to ${libexecdir}/ssh at request of 
+   David Rankin <drankin@bohemians.lexington.ky.us>
+ - Added autoconf option to enable Kerberos 4 support (untested)
+ - Added autoconf option to enable AFS support (untested)
+ - Added autoconf option to enable S/Key support (untested)
+ - Added autoconf option to enable TCP wrappers support (compiles OK)
+ - Renamed BSD helper function files to bsd-*
+ - Added tests for login and daemon and enable OpenBSD replacements for 
+   when they are absent.
+ - Added non-PAM MD5 password support patch from Tudor Bosman <tudorb@jm.nu>
+
+19991118
+ - Merged OpenBSD CVS changes
+   - [scp.c] foregroundproc() in scp
+   - [sshconnect.h] include fingerprint.h
+   - [sshd.c] bugfix: the log() for passwd-auth escaped during logging 
+     changes.
+   - [ssh.1] Spell my name right.
+ - Added openssh.com info to README
+
+19991117
+ - Merged OpenBSD CVS changes
+   - [ChangeLog.Ylonen] noone needs this anymore
+   - [authfd.c] close-on-exec for auth-socket, ok deraadt
+   - [hostfile.c] 
+     in known_hosts key lookup the entry for the bits does not need 
+     to match, all the information is contained in n and e. This 
+     solves the problem with buggy servers announcing the wrong 
+     modulus length.  markus and me.
+   - [serverloop.c] 
+     bugfix: check for space if child has terminated, from: 
+     iedowse@maths.tcd.ie
+   - [ssh-add.1 ssh-add.c ssh-keygen.1 ssh-keygen.c sshconnect.c]
+     [fingerprint.c fingerprint.h]
+     rsa key fingerprints, idea from Bjoern Groenvall <bg@sics.se>
+   - [ssh-agent.1] typo
+   - [ssh.1] add OpenSSH information to AUTHOR section. okay markus@
+   - [sshd.c] 
+     force logging to stderr while loading private key file
+     (lost while converting to new log-levels)
+
+19991116
+ - Fix some Linux libc5 problems reported by Miles Wilson <mw@mctitle.com>
+ - Merged OpenBSD CVS changes:
+   - [auth-rh-rsa.c auth-rsa.c authfd.c authfd.h hostfile.c mpaux.c]
+     [mpaux.h ssh-add.c ssh-agent.c ssh.h ssh.c sshd.c]
+     the keysize of rsa-parameter 'n' is passed implizit,
+     a few more checks and warnings about 'pretended' keysizes.
+   - [cipher.c cipher.h packet.c packet.h sshd.c]
+     remove support for cipher RC4
+   - [ssh.c]
+     a note for legay systems about secuity issues with permanently_set_uid(),
+     the private hostkey and ptrace()
+   - [sshconnect.c]
+     more detailed messages about adding and checking hostkeys
+
+19991115
+ - Merged OpenBSD CVS changes:
+   - [ssh-add.c] change passphrase loop logic and remove ref to 
+     $DISPLAY, ok niels
+ - Changed to ssh-add.c broke askpass support. Revised it to be a little more
+   modular. 
+ - Revised autoconf support for enabling/disabling askpass support.
+ - Merged more OpenBSD CVS changes:
+	[auth-krb4.c]
+	  - disconnect if getpeername() fails
+	  - missing xfree(*client)
+	[canohost.c]
+	  - disconnect if getpeername() fails
+	  - fix comment: we _do_ disconnect if ip-options are set
+	[sshd.c]
+	  - disconnect if getpeername() fails
+	  - move checking of remote port to central place
+	[auth-rhosts.c] move checking of remote port to central place
+	[log-server.c] avoid extra fd per sshd, from millert@
+	[readconf.c] print _all_ bad config-options in ssh(1), too
+	[readconf.h] print _all_ bad config-options in ssh(1), too
+	[ssh.c] print _all_ bad config-options in ssh(1), too
+	[sshconnect.c] disconnect if getpeername() fails
+ - OpenBSD's changes to sshd.c broke the PAM stuff, re-merged it.
+ - Various small cleanups to bring diff (against OpenBSD) size down.
+ - Merged more Solaris compability from Marc G. Fournier
+   <marc.fournier@acadiau.ca>
+ - Wrote autoconf tests for __progname symbol
+ - RPM spec file fixes from Jim Knoble <jmknoble@pobox.com>
+ - Released 1.2pre12
+
+ - Another OpenBSD CVS update:
+   - [ssh-keygen.1] fix .Xr
+
+19991114
+ - Solaris compilation fixes (still imcomplete)
+
+19991113
+ - Build patch from Niels Kristian Bech Jensen <nkbj@image.dk>
+   - Don't install config files if they already exist
+   - Fix inclusion of additional preprocessor directives from acconfig.h
+ - Removed redundant inclusions of config.h
+ - Added 'Obsoletes' lines to RPM spec file
+ - Merged OpenBSD CVS changes:
+   - [bufaux.c] save a view malloc/memcpy/memset/free's, ok niels
+   - [scp.c] fix overflow reported by damien@ibs.com.au: off_t 
+     totalsize, ok niels,aaron
+ - Delay fork (-f option) in ssh until after port forwarded connections 
+   have been initialised. Patch from Jani Hakala <jahakala@cc.jyu.fi>
+ - Added shadow password patch from Thomas Neumann <tom@smart.ruhr.de>
+ - Added ifdefs to auth-passwd.c to exclude it when PAM is enabled
+ - Tidied default config file some more
+ - Revised Redhat initscript to fix bug: sshd (re)start would fail
+   if executed from inside a ssh login.
+
+19991112
+ - Merged changes from OpenBSD CVS
+   - [sshd.c] session_key_int may be zero
+   - [auth-rh-rsa.c servconf.c servconf.h ssh.h sshd.8 sshd.c sshd_config]
+     IgnoreUserKnownHosts(default=no), used for RhostRSAAuth, ok 
+     deraadt,millert
+ - Brought default sshd_config more in line with OpenBSD's
+ - Grab server in gnome-ssh-askpass (Debian bug #49872)
+ - Released 1.2pre10
+
+ - Added INSTALL documentation
+ - Merged yet more changes from OpenBSD CVS
+   - [auth-rh-rsa.c auth-rhosts.c auth-rsa.c channels.c clientloop.c]
+     [ssh.c ssh.h sshconnect.c sshd.c]
+     make all access to options via 'extern Options options'
+     and 'extern ServerOptions options' respectively;
+     options are no longer passed as arguments:
+      * make options handling more consistent
+      * remove #include "readconf.h" from ssh.h
+      * readconf.h is only included if necessary
+   - [mpaux.c] clear temp buffer
+   - [servconf.c] print _all_ bad options found in configfile
+ - Make ssh-askpass support optional through autoconf
+ - Fix nasty division-by-zero error in scp.c
+ - Released 1.2pre11
+
+19991111
+ - Added (untested) Entropy Gathering Daemon (EGD) support
+ - Fixed /dev/urandom fd leak (Debian bug #49722)
+ - Merged OpenBSD CVS changes:
+   - [auth-rh-rsa.c] user/958: check ~/.ssh/known_hosts for rhosts-rsa, too
+   - [ssh.1] user/958: check ~/.ssh/known_hosts for rhosts-rsa, too
+   - [sshd.8] user/958: check ~/.ssh/known_hosts for rhosts-rsa, too
+ - Fix integer overflow which was messing up scp's progress bar for large 
+   file transfers. Fix submitted to OpenBSD developers. Report and fix
+   from Kees Cook <cook@cpoint.net>
+ - Merged more OpenBSD CVS changes:
+   - [auth-krb4.c auth-passwd.c] remove x11- and krb-cleanup from fatal() 
+     + krb-cleanup cleanup
+   - [clientloop.c log-client.c log-server.c ]
+     [readconf.c readconf.h servconf.c servconf.h ]
+     [ssh.1 ssh.c ssh.h sshd.8]
+     add LogLevel {QUIET, FATAL, ERROR, INFO, CHAT, DEBUG} to ssh/sshd,
+     obsoletes QuietMode and FascistLogging in sshd.
+   - [sshd.c] fix fatal/assert() bug reported by damien@ibs.com.au:
+     allow session_key_int != sizeof(session_key)
+     [this should fix the pre-assert-removal-core-files]
+ - Updated default config file to use new LogLevel option and to improve
+   readability
+
+19991110
+ - Merged several minor fixes:
+   - ssh-agent commandline parsing
+   - RPM spec file now installs ssh setuid root
+   - Makefile creates libdir
+   - Merged beginnings of Solaris compability from Marc G. Fournier
+     <marc.fournier@acadiau.ca>
+
+19991109
+ - Autodetection of SSL/Crypto library location via autoconf
+ - Fixed location of ssh-askpass to follow autoconf
+ - Integrated Makefile patch from Niels Kristian Bech Jensen <nkbj@image.dk>
+ - Autodetection of RSAref library for US users
+ - Minor doc updates
+ - Merged OpenBSD CVS changes:
+   - [rsa.c] bugfix: use correct size for memset()
+   - [sshconnect.c] warn if announced size of modulus 'n' != real size
+ - Added GNOME passphrase requestor (use --with-gnome-askpass)
+ - RPM build now creates subpackages
+ - Released 1.2pre9
+
+19991108
+ - Removed debian/ directory. This is now being maintained separately.
+ - Added symlinks for slogin in RPM spec file
+ - Fixed permissions on manpages in RPM spec file
+ - Added references to required libraries in README file
+ - Removed config.h.in from CVS
+ - Removed pwdb support (better pluggable auth is provided by glibc)
+ - Made PAM and requisite libdl optional
+ - Removed lots of unnecessary checks from autoconf
+ - Added support and autoconf test for openpty() function (Unix98 pty support)
+ - Fix for scp not finding ssh if not installed as /usr/bin/ssh
+ - Added TODO file
+ - Merged parts of Debian patch From Phil Hands <phil@hands.com>:
+   - Added ssh-askpass program
+   - Added ssh-askpass support to ssh-add.c
+   - Create symlinks for slogin on install
+   - Fix "distclean" target in makefile
+   - Added example for ssh-agent to manpage
+   - Added support for PAM_TEXT_INFO messages
+   - Disable internal /etc/nologin support if PAM enabled
+ - Merged latest OpenBSD CVS changes:
+   - [all] replace assert() with error, fatal or packet_disconnect
+   - [sshd.c] don't send fail-msg but disconnect if too many authentication
+     failures
+   - [sshd.c] remove unused argument. ok dugsong
+   - [sshd.c] typo
+   - [rsa.c] clear buffers used for encryption. ok: niels
+   - [rsa.c] replace assert() with error, fatal or packet_disconnect
+   - [auth-krb4.c] remove unused argument. ok dugsong
+ - Fixed coredump after merge of OpenBSD rsa.c patch
+ - Released 1.2pre8
+
+19991102
+ - Merged change from OpenBSD CVS
+  - One-line cleanup in sshd.c
+
+19991030
+ - Integrated debian package support from Dan Brosemer <odin@linuxfreak.com>
+ - Merged latest updates for OpenBSD CVS:
+   - channels.[ch] - remove broken x11 fix and document istate/ostate
+   - ssh-agent.c - call setsid() regardless of argv[]
+   - ssh.c - save a few lines when disabling rhosts-{rsa-}auth
+ - Documentation cleanups
+ - Renamed README -> README.Ylonen
+ - Renamed README.openssh ->README
+
+19991029
+ - Renamed openssh* back to ssh* at request of Theo de Raadt
+ - Incorporated latest changes from OpenBSD's CVS
+ - Integrated Makefile patch from  Niels Kristian Bech Jensen <nkbj@image.dk>
+ - Integrated PAM env patch from Nalin Dahyabhai <nalin.dahyabhai@pobox.com>
+ - Make distclean now removed configure script
+ - Improved PAM logging
+ - Added some debug() calls for PAM
+ - Removed redundant subdirectories
+ - Integrated part of a patch from Dan Brosemer <odin@linuxfreak.com> for 
+   building on Debian.
+ - Fixed off-by-one error in PAM env patch
+ - Released 1.2pre6
+
+19991028
+ - Further PAM enhancements.
+   - Much cleaner
+   - Now uses account and session modules for all logins.
+ - Integrated patch from Dan Brosemer <odin@linuxfreak.com>
+   - Build fixes
+   - Autoconf
+   - Change binary names to open*
+ - Fixed autoconf script to detect PAM on RH6.1
+ - Added tests for libpwdb, and OpenBSD functions to autoconf
+ - Released 1.2pre4
+
+ - Imported latest OpenBSD CVS code
+ - Updated README.openssh
+ - Released 1.2pre5
+
+19991027
+ - Adapted PAM patch.
+ - Released 1.0pre2
+
+ - Excised my buggy replacements for strlcpy and mkdtemp
+ - Imported correct OpenBSD strlcpy and mkdtemp routines.
+ - Reduced arc4random_stir entropy read to 32 bytes (256 bits)
+ - Picked up correct version number from OpenBSD
+ - Added sshd.pam PAM configuration file
+ - Added sshd.init Redhat init script
+ - Added openssh.spec RPM spec file
+ - Released 1.2pre3
+
+19991026
+ - Fixed include paths of OpenSSL functions
+ - Use OpenSSL MD5 routines
+ - Imported RC4 code from nanocrypt
+ - Wrote replacements for OpenBSD arc4random* functions
+ - Wrote replacements for strlcpy and mkdtemp
+ - Released 1.0pre1

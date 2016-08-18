@@ -1,0 +1,29 @@
+CC	= @CC@
+CFLAGS	= @CFLAGS@ -I../../include
+
+STAT  = autopost account averun badbms bbsuptime birthday\
+	horoscope newacct perms poststat usage 
+
+.c.o:   ;   $(CC) $(CFLAGS) -c $*.c
+
+all: $(STAT)
+
+install: $(STAT)
+	cp $(STAT) ../../../bin
+	cp bbs_postlist.pl ../../../bin
+	chmod +x ../../../bin/bbs_postlist.pl
+
+clean:
+	rm -fr *.o *.BAK *.log $(STAT) *core* DEAD* *~
+
+autopost: autopost.c ../../include/bbs.h
+	$(CC) $(CFLAGS) -o autopost autopost.c -I../../include -L../../lib -lBBS -lSystem
+
+usage: usage.cpp ../../include/bbs.h
+	/usr/bin/g++ $(CFLAGS) -o usage usage.cpp  -I../../include -L../../lib -lBBS -lSystem -D_NO_PROTOTYPE
+
+usagepost: usagepost.c ../../include/bbs.h
+	$(CC) $(CFLAGS) -o usagepost usagepost.c -I../../include -L../../lib -lBBS -lSystem
+
+postfile: postfile.c ../../include/bbs.h
+	$(CC) $(CFLAGS) -o postfile postfile.c -I../../include -L../../lib -lBBS -lSystem

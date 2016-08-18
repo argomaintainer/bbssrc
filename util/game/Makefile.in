@@ -1,0 +1,28 @@
+BBSHOME=@BBSHOME@
+
+CC      = gcc
+CFLAGS  = -O2
+DEFINES = -I../../include/ @OSDEF@
+
+.c.o:
+	$(CC) $(CFLAGS) $(DEFINES) -c $*.c
+
+all: winmine worker
+
+winmine: winmine.c
+	$(CC) -O2 -o winmine winmine.c
+
+worker: worker.c
+	$(CC) -O2 -o worker worker.c
+
+install: winmine worker
+	cp winmine $(BBSHOME)/bin/winmine.new
+	-mv $(BBSHOME)/bin/winmine $(BBSHOME)/bin/winmine.old
+	mv $(BBSHOME)/bin/winmine.new $(BBSHOME)/bin/winmine
+	cp worker $(BBSHOME)/bin/worker.new
+	-mv $(BBSHOME)/bin/worker $(BBSHOME)/bin/worker.old
+	mv $(BBSHOME)/bin/worker.new $(BBSHOME)/bin/worker
+
+clean:
+	-rm -f *~ *.o DEADJOE *.so winmine worker
+

@@ -1,0 +1,31 @@
+#
+# Crontab 范例档，请做适当修改以适合您的系统。
+#
+# (Cron version -- $Id: cron.bbs,v 1.1.1.1 2003-02-20 19:54:45 bbs Exp $)
+#
+#
+# User /bin/sh to run the crontab
+SHELL=/bin/sh
+###### 上站人数统计 ######
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * /home/bbs/bin/bbsuptime >> /home/bbs/reclog/uptime.log
+57 * * * * /home/bbs/bin/averun /home/bbs/reclog/uptime.log;/bin/rm /home/bbs/reclog/uptime.log
+56 0 * * * /bin/mv /home/bbs/0Announce/bbslist/today /home/bbs/0Announce/bbslist/yesterday; /bin/rm /home/bbs/reclog/ave.src
+###### 上站人次统计 ######
+0,5,10,15,20,25,30,35,40,45,50,55 * * * * /home/bbs/bin/account
+0 0 * * * /bin/mv /home/bbs/0Announce/bbslist/countusr /home/bbs/0Announce/bbslist/countusr.last; touch /home/bbs/0Announce/bbslist/countusr
+###### 积分排行榜 ######
+0 0 * * * /home/bbs/bin/bbstop /home/bbs 50 1 > /home/bbs/0Announce/bbslist/toplogin
+0 0 * * * /home/bbs/bin/bbstop /home/bbs 50 2 > /home/bbs/0Announce/bbslist/toppost
+0 0 * * * /home/bbs/bin/bbstop /home/bbs 50 3 > /home/bbs/0Announce/bbslist/topstay
+0 0 * * * /home/bbs/bin/bbstop /home/bbs 50 4 > /home/bbs/0Announce/bbslist/topall
+#富翁排行榜
+0 0 * * * /home/bbs/bin/bbstop /home/bbs 50 5 > /home/bbs/0Announce/bbslist/topall
+###### 热门话题 ######
+10 * * * * /home/bbs/bin/poststat /home/bbs
+###### 讨论区使用率统计 ######
+15 * * * * /home/bbs/bin/usage 0 ; /home/bbs/bin/usage 1
+###### 本日新增帐号 ######
+0 * * * * /home/bbs/bin/newacct
+59 23 * * * /bin/mv /home/bbs/0Announce/bbslist/newacct.today /home/bbs/0Announce/bbslist/newacct.last
+###### 星座、生肖统计 #####
+0 * * * * /home/bbs/bin/horoscope

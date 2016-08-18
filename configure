@@ -1,0 +1,278 @@
+#!/usr/bin/perl
+
+use strict;
+use Sys::Hostname;
+use Net::hostent;
+use Socket;
+
+# some global variables
+my %x;
+my $currentpath;
+my $ostype;
+my $cc_osdep_options;
+my $libs;
+my ($gid, $uid);
+my ($domainame, $hostip);
+my $sendmail;
+my $installer;
+# end of global virables
+
+
+&init_variables;
+&init_osdep_variables;
+&check_c_compiler;
+&check_sendmail;
+&retrieve_gid_uid($x{"username"}, $x{"groupname"});
+&retrieve_host_ip;
+
+system "chmod +x install.sh" unless -x "install.sh";
+
+&update_configuration("Makefile.in", "Makefile");
+&update_configuration("src/Makefile.in", "src/Makefile");
+&update_configuration("src/Install.sh.in", "src/Install.sh");
+&update_configuration("lib/Makefile.in", "lib/Makefile");
+&update_configuration("include/config.h.in", "include/config.h");
+&update_configuration("util/game/Makefile.in", "util/game/Makefile");
+&update_configuration("util/stat/Makefile.in", "util/stat/Makefile");
+
+sub init_variables
+{
+	
+	chop($currentpath = `pwd`);
+
+	$x{"cc_options"} = "-O -Os -m32 -Wno-format-y2k -fno-builtin";
+	$x{"prefix"} = "/home/bbs/bbs_home";
+	$x{"username"} = "bbs";
+	$x{"groupname"} = "bbs";
+	$x{"deliver"} = "deliver";
+	$x{"sitename"} = "Yat-sen Channel";
+	$x{"defaultboard"} = "Complain";
+	$x{"defaultbmboard"} = "BoardManager";
+	$x{"defaultfavboard"} = "BBS_Help";
+	$x{"defaultrecommendboard"} = "Recommend";
+	$x{"maxusers"} = 32000;
+	$x{"maxboards"} = 256;
+	$x{"maxonlineusers"} = 2048;
+	$x{"compiler"} = undef;
+
+	foreach $_(@ARGV) {
+		if (/--(.*)=(.*)/ && exists $x{"$1"}) {
+			$x{"$1"} = $2;
+		} else {
+			&showhelp;
+		}
+	}
+
+	# Make sure ${"prefix"} is not ending with '/'.
+	if ($x{"prefix"} =~ /\/$/) {
+		chop($x{"prefix"});
+	}
+}
+
+sub init_osdep_variables
+{
+	my $osversion;
+	
+	print "checking host system type...";
+	
+	chop($_ = `uname`);
+	chop($osversion = `uname -r`);
+	
+	if (/cygwin/i) {
+		$ostype = "CYGWIN";
+		$cc_osdep_options = "-DCYGWIN -DTERMIOS -DHAVE_SNPRINTF";
+		$libs = "-ltermcap";
+	} elsif (/freebsd/i) {
+		$ostype = "FreeBSD";
+		$cc_osdep_options = "-DFREEBSD -DBSD44 -DTERMIOS -DHAVE_SNPRINTF -DHAVE_SETPROCTITLE -DHAVE_STRUCT_UTIMBUF";
+		$libs = "-ltermcap";
+	} elsif (/linux/i) {
+		$ostype = "Linux";
+		$cc_osdep_options = "-DLINUX -DTERMIOS -DHAVE_SNPRINTF -DHAVE_STRUCT_UTIMBUF -D__USE_GNU -D_GNU_SOURCE";
+		$libs = "-lncurses -L/usr/lib -lcurl";
+	} elsif (/osf1/i) {
+		$ostype = "OSF1/Tru64";
+		$cc_osdep_options = "-DOSF -DTERMIOS";
+		$libs = "-ltermcap";
+	} elsif (/solaris/i) {
+		$ostype = "Solaris";
+		$cc_osdep_options = "-DSOLARIS -DSYSV -DTERMIOS";
+		$libs = "-ltermcap -lsocket -lnsl -lbsd -L/usr/ucblib -lucb";		
+	} else {
+		$ostype = "Unknown";
+		$osversion = "1.0";
+	}
+	
+	print "done (", $ostype, ")\n";
+}
+
+sub check_c_compiler 
+{
+	my $prog;
+	
+	print "checking whether C compiler works...";
+
+	# We prefer gcc to cc, prefer '/usr/bin' to '/usr/local/bin'.
+	my @ccs = ( "/usr/bin/gcc", "/usr/local/bin/gcc", "/usr/bin/cc", "/usr/local/bin/cc" );
+
+	if (defined $x{"compiler"} && -x $x{"compiler"}) {
+		print "yes (", $x{"compiler"}, ")\n";
+		return;
+	}
+
+	foreach $prog(@ccs) {
+		if (-x $prog) {
+			$x{"compiler"} = $prog;
+			print "yes (", $prog, ")\n";
+			return;
+		}
+	}
+
+	print "no\n";
+	die;
+}
+
+sub check_sendmail
+{
+	my $prog;
+	
+	print "checking whether sendmail installed...";
+
+	my @sendmails = ( "/usr/sbin/sendmail", "/usr/local/sbin/sendmail" );
+
+	foreach $prog(@sendmails) {
+		if (-x $prog) {
+			$sendmail = $prog;
+			print "yes (", $prog, ")\n";
+			return;
+		}
+	}
+
+	print "no\n";
+}
+
+sub retrieve_gid_uid
+{
+	my $username = shift;
+	my $groupname = shift;
+	my @pw;
+
+	print "checking for corrosponding gid and uid... ";
+	if ($username eq $groupname) {
+		@pw = getpwnam($username);
+		$uid = $pw[2];
+		$gid = $pw[3];
+	} else {
+		@pw = getpwnam($username);
+		$uid = $pw[2];
+		@pw = getpwnam($groupname);
+		$gid = $pw[3];
+	}
+
+	if (!defined $uid || !defined $gid) {
+		print "failed\n";
+		die;
+	}
+	
+	print "done (", $gid, ", ", $uid, ")\n";
+}
+
+sub retrieve_host_ip
+{
+	my $h;
+	
+	print "checking for host domain name...";
+	$domainame = hostname;
+	print "done (", $domainame, ")\n";
+
+	print "checking for host ip...";
+	unless ($h = gethost($domainame)) {
+		$hostip = "127.0.0.1";
+		print "failed (use 127.0.0.1 as default value)\n";
+		return;
+	}
+
+	$hostip = inet_ntoa($h->addr);
+	print "done (", $hostip, ")\n";
+}
+
+sub update_configuration
+{
+	my $src = @_[0];
+	my $dst = ">".@_[1];
+	print "creating ", @_[1], "...";
+	
+	unless (open(fin, $src)) {
+		print "failed\n";
+		close(fin);
+		return;
+	}
+
+	unless (open(fout, $dst)) {
+		print "failed\n";
+		close(fin);
+		close(fout);
+		return;
+	}
+
+	while (<fin>) {
+		print fout update_configuration_line($_);
+	}
+
+	close(fin);
+	close(fout);
+	print "done\n";
+}
+
+sub update_configuration_line
+{
+	$_ = @_[0];
+	$installer = $currentpath . "/install.sh";
+
+	s/\@BBSHOME\@/$x{"prefix"}/;
+	s/\@BBSUID\@/$uid/;
+	s/\@BBSGID\@/$gid/;
+	s/\@CC\@/$x{"compiler"}/;
+	s/\@OSDEF\@/$cc_osdep_options/;
+	s/\@CFLAGS\@/$x{"cc_options"}/;
+	s/\@LIBS\@/$libs/;
+	s/\@INSTALLER\@/$installer/;
+	s/\@DEFAULTBOARD\@/$x{"defaultboard"}/;
+	s/\@ORDAINBM_POST_BOARDNAME\@/$x{"defaultbmboard"}/;
+	s/\@DEFAULTFAVBOARD\@/$x{"defaultfavboard"}/;
+	s/\@DEFAULTRECOMMENDBOARD\@/$x{"defaultrecommendboard"}/;
+	s/\@BBSNAME\@/$x{"sitename"}/;
+	s/\@DELIVER\@/$x{"deliver"}/;
+	s/\@BBSHOST\@/$domainame/;
+	s/\@BBSIP\@/$hostip/;
+	s/\@SENDMAIL\@/$sendmail/;
+	s/\@MAXUSERS\@/$x{"maxusers"}/;
+	s/\@MAXBOARDS\@/$x{"maxboards"}/;
+	s/\@MAXONLINEUSERS\@/$x{"maxonlineusers"}/;
+
+	return $_;
+}
+
+sub showhelp {
+	print "configure [options]\n\n";
+	print "Options: [defaults in brackets after descriptions]\n\n";
+	print "Configuration: \n";
+	print "  --help			print this message\n\n";
+	print "Directory and filenames: \n";
+	print "  --prefix=PREFIX		install the system in PREFIX [/home/bbs]\n\n";
+	print "Compiler: \n";
+	print "  --compiler=COMPILER		use user-specified c compiler\n\n";
+	print "Parameters: \n";
+	print "  --sitename=SITENAME		the name of the system [TestLand]\n";
+	print "  --username=USERNAME		the system runs as USERNAME [bbs]\n";
+	print "  --groupname=GROUPNAME		the system runs as GROUPNAME [bbs]\n";
+	print "  --maxusers=MAXUSERS    	the maxinum number of users the system supports [20236]\n";
+	print "  --maxboards=MAXBOARDS  	the maxinum number of boards the system supports [256]\n";
+	print "  --maxonlineusers=MAXONLINE	the maxinum number of online users the system supports [2048]\n";
+	print "  --defaultboard=BOARDNAME	the default board of the system [sysop]\n";
+	print "  --defaultfavboard=BOARDNAME	the default favorite board of the system [sysop]\n";
+	print "  --defaultrecommendboard=BOARDNAME the default recommend board of the sysytem [sysop]\n";
+	print "  --deliver=ID			the deliver id of the system [deliver]\n";
+	exit;
+}
+

@@ -1,0 +1,8 @@
+$Id: 00README,v 1.1.1.1 2003-02-20 19:54:45 bbs Exp $
+	
+	example/ 档案说明
+	
+	sendmail.cf	: 给 BBS 用的 sendmail.cf 范例
+	cron.bbs	: BBS 的范例 crontab 
+	expire.ctl	: expire.ctl 范例档（应放在 $BBSHOME/etc/ 下）
+	startbbs.sh	: 启动 bbs 全套服务的 script。

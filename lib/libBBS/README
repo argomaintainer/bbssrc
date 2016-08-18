@@ -1,0 +1,2 @@
+libBBS is used by some utility in src/util/,and you may need it when 
+writing tools.

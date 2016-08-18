@@ -1,0 +1,90 @@
+#ifdef BBSMAIN
+int Boards();
+int Conditions();
+int EGroup(char *cmd);
+int GoodBrds();
+int SysGoodBrds();
+int Goodbye();
+int Info();
+int New();
+int Post();
+int Read();
+int Select();
+int Users();
+int Welcome();
+int a_edits();
+int add_personalcorpus();
+int announce();
+int bm_post_perm();
+int bm_post_stat();
+int d_board();
+int d_user();
+int domenu();
+int ent_bnet();
+int ent_chat();
+int ent_winmine();
+int ent_worker();
+int fast_cloak();
+int flag_clear_allboards();
+int friend_wall();
+int g_send();
+int kick_user();
+int m_editbrd();
+int m_info();
+int m_internet();
+int m_mclean();
+int m_new();
+int m_newbrd();
+int m_ordainBM();
+int m_read();
+int m_register();
+int m_retireBM();
+int m_send();
+int m_vote();
+int mailall();
+int offline();
+int pannounce();
+int personal();
+int restart_bbs();
+int s_msg();
+int setcalltime();
+int setsystempasswd();
+int show_allmsgs();
+int shownotepad();
+int switch_code();
+int t_friend();
+int t_friends();
+int t_list();
+int t_maildeny();
+int t_monitor();
+int t_pager();
+int t_query();
+int t_reject();
+int t_talk();
+int t_users();
+int t_users();
+int user_poststat();
+int bm_ann_report();
+int wait_friend();
+int wall();
+int x_cloak();
+int x_cloak();
+int x_denylevel();
+int x_edits();
+int x_fillform();
+int x_info();
+int x_level();
+int x_lockscreen();
+int x_results();
+int x_showuser();
+int x_userdefine();
+int x_vote();
+
+#ifdef RESTART_BBSD
+int m_restart_bbsd(void);
+#endif
+
+int m_activation(); /* Add by betterman 06.07.15 */
+
+#endif
+

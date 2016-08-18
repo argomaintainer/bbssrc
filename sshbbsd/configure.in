@@ -1,0 +1,847 @@
+AC_INIT(ssh.c)
+
+AC_CONFIG_HEADER(config.h)
+AC_PROG_CC
+AC_CANONICAL_HOST
+
+# Checks for programs.
+AC_PROG_CPP
+AC_PROG_RANLIB
+AC_PROG_INSTALL
+AC_CHECK_PROG(AR, ar, ar)
+AC_PATH_PROG(PERL, perl)
+AC_SUBST(PERL)
+
+if test -z "$LD" ; then
+	LD=$CC
+fi
+AC_SUBST(LD)
+	
+# C Compiler features
+AC_C_INLINE
+if test "$GCC" = "yes"; then 
+	CFLAGS="$CFLAGS -Wall"
+fi
+
+# Check for some target-specific stuff
+case "$host" in
+*-*-aix*)
+	AFS_LIBS="-lld"
+	CFLAGS="$CFLAGS -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	if test "$LD" != "gcc" -a -z "$blibpath"; then
+		blibpath="/usr/lib:/lib:/usr/local/lib"
+	fi
+	AC_DEFINE(BROKEN_GETADDRINFO)
+	;;
+*-*-hpux10*)
+	if test -z "$GCC"; then
+		CFLAGS="$CFLAGS -Aa"
+	fi
+	CFLAGS="$CFLAGS -D_HPUX_SOURCE"
+	CFLAGS="$CFLAGS -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	AC_DEFINE(IPADDR_IN_DISPLAY)
+	AC_DEFINE(USE_UTMPX)
+	AC_MSG_CHECKING(for HPUX trusted system password database)
+	if test -f /tcb/files/auth/system/default; then
+		AC_MSG_RESULT(yes)
+		AC_DEFINE(HAVE_HPUX_TRUSTED_SYSTEM_PW)
+		LIBS="$LIBS -lsec"
+		AC_MSG_WARN([This configuration is untested])
+	else
+		AC_MSG_RESULT(no)
+		AC_DEFINE(DISABLE_SHADOW)
+	fi
+	MANTYPE='$(CATMAN)'
+	mansubdir=cat
+	;;
+*-*-irix5*)
+	CFLAGS="$CFLAGS -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	MANTYPE='$(CATMAN)'
+	no_libsocket=1
+	no_libnsl=1
+	;;
+*-*-irix6*)
+	CFLAGS="$CFLAGS -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	MANTYPE='$(CATMAN)'
+	AC_MSG_WARN([*** Irix 6.x is not tested, please report you experiences *** ])
+	no_libsocket=1
+	no_libnsl=1
+	;;
+*-*-linux*)
+	no_dev_ptmx=1
+	AC_DEFINE(DONT_TRY_OTHER_AF)
+	inet6_default_4in6=yes
+	;;
+*-*-netbsd*)
+	need_dash_r=1
+	;;
+*-*-solaris*)
+	CFLAGS="$CFLAGS -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib -R/usr/local/lib -L/usr/ucblib -R/usr/ucblib"
+	need_dash_r=1
+	AC_DEFINE(USE_UTMPX)
+	;;
+*-*-sysv*)
+	CFLAGS="$CFLAGS -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	AC_DEFINE(USE_UTMPX)
+	MANTYPE='$(CATMAN)'
+	mansubdir=cat
+	LIBS="$LIBS -lgen -lsocket"
+	;;
+esac
+
+# Checks for libraries.
+AC_CHECK_LIB(z, deflate, ,AC_MSG_ERROR([*** zlib missing - please install first ***]))
+AC_CHECK_LIB(util, login, AC_DEFINE(HAVE_LIBUTIL_LOGIN) LIBS="$LIBS -lutil")
+
+if test -z "$no_libsocket" ; then
+	AC_CHECK_LIB(nsl, yp_match, , )
+fi
+if test -z "$no_libnsl" ; then
+	AC_CHECK_LIB(socket, main, , )
+fi
+
+# Checks for header files.
+AC_CHECK_HEADERS(bstring.h endian.h lastlog.h login.h maillock.h netdb.h netgroup.h paths.h poll.h pty.h shadow.h security/pam_appl.h sys/bitypes.h sys/bsdtty.h sys/cdefs.h sys/poll.h sys/select.h sys/stropts.h sys/sysmacros.h sys/time.h sys/ttcompat.h stddef.h util.h utmp.h utmpx.h)
+
+# Checks for library functions.
+AC_CHECK_FUNCS(arc4random bindresvport_af freeaddrinfo gai_strerror getaddrinfo getnameinfo innetgr md5_crypt mkdtemp openpty rresvport_af setenv seteuid setlogin setproctitle setreuid snprintf strlcat strlcpy updwtmpx vsnprintf _getpty)
+
+AC_CHECK_FUNC(login, 
+	[AC_DEFINE(HAVE_LOGIN)],
+	[AC_CHECK_LIB(bsd, login, [LIBS="$LIBS -lbsd"; AC_DEFINE(HAVE_LOGIN)])]
+)
+
+AC_CHECK_FUNC(daemon, 
+	[AC_DEFINE(HAVE_DAEMON)],
+	[AC_CHECK_LIB(bsd, daemon, [LIBS="$LIBS -lbsd"; AC_DEFINE(HAVE_DAEMON)])]
+)
+
+AC_CHECK_FUNC(getpagesize, 
+	[AC_DEFINE(HAVE_GETPAGESIZE)],
+	[AC_CHECK_LIB(ucb, getpagesize, [LIBS="$LIBS -lucb"; AC_DEFINE(HAVE_GETPAGESIZE)])]
+)
+
+AC_ARG_WITH(pam,
+	[  --without-pam           Disable PAM support ],
+	[
+		if test "x$withval" = "xno" ; then
+			no_pam=1
+			AC_DEFINE(DISABLE_PAM)
+		fi
+	]
+)
+if test -z "$no_pam" -a "x$ac_cv_header_security_pam_appl_h" = "xyes" ; then
+	AC_CHECK_LIB(dl, dlopen, , )
+	LIBS="$LIBS -lpam"
+
+	# Check PAM strerror arguments (old PAM)
+	AC_MSG_CHECKING([whether pam_strerror takes only one argument])
+	AC_TRY_COMPILE(
+		[
+			#include <stdlib.h>
+			#include <security/pam_appl.h>
+		], 
+		[(void)pam_strerror((pam_handle_t *)NULL, -1);], 
+		[AC_MSG_RESULT(no)],
+		[
+			AC_DEFINE(HAVE_OLD_PAM)
+			AC_MSG_RESULT(yes)
+		]
+	) 
+fi
+
+# The big search for OpenSSL
+AC_ARG_WITH(ssl-dir,
+	[  --with-ssl-dir=PATH     Specify path to OpenSSL installation ],
+	[
+		if test "x$withval" != "$xno" ; then
+			tryssldir=$withval
+		fi
+	]
+)
+
+saved_LIBS="$LIBS"
+saved_LDFLAGS="$LDFLAGS"
+saved_CFLAGS="$CFLAGS"
+if test "x$prefix" != "xNONE" ; then
+	tryssldir="$tryssldir $prefix"
+fi
+AC_MSG_CHECKING([for OpenSSL/SSLeay directory])
+for ssldir in "" $tryssldir /usr/local/openssl /usr/lib/openssl /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg /opt /opt/openssl ; do
+	if test ! -z "$ssldir" ; then
+		LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
+		CFLAGS="$saved_CFLAGS -I$ssldir/include"
+		if test ! -z "$need_dash_r" ; then
+			LDFLAGS="$LDFLAGS -R$ssldir/lib -R$ssldir"
+		fi
+	else
+		LDFLAGS="$saved_LDFLAGS"
+	fi
+
+	for WANTS_RSAREF in "" 1 ; do
+		
+		if test -z "$WANTS_RSAREF" ; then
+			LIBS="$saved_LIBS -lcrypto"
+		else
+			LIBS="$saved_LIBS -lcrypto -lRSAglue -lrsaref"
+		fi
+
+		AC_TRY_RUN(
+			[
+				#include <openssl/rsa.h>
+				#include <openssl/bn.h>
+				#include <openssl/sha.h>
+				int main(void) 
+				{RSA *key; char seed[2048];memset(seed, 0, sizeof(seed));
+				RAND_seed(seed, sizeof(seed));key=RSA_generate_key(32,3,NULL,NULL);
+				return(key==NULL);}
+			],
+			[
+				AC_DEFINE(HAVE_OPENSSL)
+				found_crypto=1
+				break;
+			], []
+		)
+		AC_TRY_RUN(
+			[
+				#include <ssl/rsa.h>
+				#include <ssl/bn.h>
+				#include <ssl/sha.h>
+				int main(void) 
+				{RSA *key; char seed[2048];memset(seed, 0, sizeof(seed));
+				RAND_seed(seed, sizeof(seed));key=RSA_generate_key(32,3,NULL,NULL);
+				return(key==NULL);}
+			],
+			[
+				AC_DEFINE(HAVE_SSL)
+				found_crypto=1
+				break;
+			], []
+		)
+	done
+
+	if test ! -z "$found_crypto" ; then
+		break;
+	fi
+done
+
+if test -z "$found_crypto" ; then
+	AC_MSG_ERROR([Could not find working SSLeay / OpenSSL libraries, please install])	
+fi
+if test -z "$ssldir" ; then
+	ssldir="(system)"
+else
+	CFLAGS="$saved_CFLAGS -I$ssldir/include"
+	LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
+	if test ! -z "$need_dash_r" ; then
+		LDFLAGS="$LDFLAGS -R$ssldir/lib -R$ssldir"
+	fi
+	if test ! -z "$blibpath" ; then
+		blibpath="$blibpath:$ssldir:$ssldir/lib"
+	fi
+fi
+if test -z "$WANTS_RSAREF" ; then
+	LIBS="$saved_LIBS -lcrypto"
+else
+	LIBS="$saved_LIBS -lcrypto -lRSAglue -lrsaref"
+fi
+AC_MSG_RESULT($ssldir)
+
+# Checks for data types
+AC_CHECK_SIZEOF(char, 1)
+AC_CHECK_SIZEOF(short int, 2)
+AC_CHECK_SIZEOF(int, 4)
+AC_CHECK_SIZEOF(long int, 4)
+AC_CHECK_SIZEOF(long long int, 8)
+
+# More checks for data types
+AC_MSG_CHECKING([for intXX_t types])
+AC_TRY_COMPILE(
+	[#include <sys/types.h>], 
+	[int8_t a; int16_t b; int32_t c; int64_t d; a = b = c = d = 1;], 
+	[
+		AC_DEFINE(HAVE_INTXX_T)
+		AC_MSG_RESULT(yes)
+		have_intxx_t=1
+	],
+	[AC_MSG_RESULT(no)]
+) 
+
+AC_MSG_CHECKING([for u_intXX_t types])
+AC_TRY_COMPILE(
+	[#include <sys/types.h>], 
+	[u_int8_t a; u_int16_t b; u_int32_t c; u_int64_t d; a = b = c = d = 1;], 
+	[
+		AC_DEFINE(HAVE_U_INTXX_T)
+		AC_MSG_RESULT(yes)
+		have_u_intxx_t=1
+	],
+	[AC_MSG_RESULT(no)]
+) 
+
+if test -z "$have_u_intxx_t" -o -z "$have_intxx_t" -a \
+           "x$ac_cv_header_sys_bitypes_h" = "xyes"
+then
+	AC_MSG_CHECKING([for intXX_t and u_intXX_t types in sys/bitypes.h])
+	AC_TRY_COMPILE(
+		[#include <sys/bitypes.h>], 
+		[
+			int8_t a; int16_t b; int32_t c; int64_t d;
+			u_int8_t e; u_int16_t f; u_int32_t g; u_int64_t h; 
+			a = b = c = d = e = f = g = h = 1;
+		], 
+		[
+			AC_DEFINE(HAVE_U_INTXX_T)
+			AC_DEFINE(HAVE_INTXX_T)
+			AC_MSG_RESULT(yes)
+		],
+		[AC_MSG_RESULT(no)]
+	) 
+fi
+
+if test -z "$have_u_intxx_t" ; then
+	AC_MSG_CHECKING([for uintXX_t types])
+	AC_TRY_COMPILE(
+		[#include <sys/types.h>], 
+		[uint8_t a; uint16_t b; uint32_t c; uint64_t d; a = b = c = d = 1;], 
+		[
+			AC_DEFINE(HAVE_UINTXX_T)
+			AC_MSG_RESULT(yes)
+		],
+		[AC_MSG_RESULT(no)]
+	) 
+fi
+
+AC_MSG_CHECKING([for socklen_t])
+AC_TRY_COMPILE(
+	[
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	],
+	[socklen_t foo; foo = 1235;],
+	[
+		AC_DEFINE(HAVE_SOCKLEN_T)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+AC_MSG_CHECKING([for size_t])
+AC_TRY_COMPILE(
+	[#include <sys/types.h>],
+	[size_t foo; foo = 1235;],
+	[
+		AC_DEFINE(HAVE_SIZE_T)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+AC_MSG_CHECKING([for struct sockaddr_storage])
+AC_TRY_COMPILE(
+	[
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	],
+	[struct sockaddr_storage s;],
+	[
+		AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+AC_MSG_CHECKING([for struct sockaddr_in6])
+AC_TRY_COMPILE(
+	[#include <netinet/in.h>],
+	[struct sockaddr_in6 s; s.sin6_family = 0;],
+	[
+		AC_DEFINE(HAVE_STRUCT_SOCKADDR_IN6)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+AC_MSG_CHECKING([for struct in6_addr])
+AC_TRY_COMPILE(
+	[#include <netinet/in.h>],
+	[struct in6_addr s; s.s6_addr[0] = 0;],
+	[
+		AC_DEFINE(HAVE_STRUCT_IN6_ADDR)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+AC_MSG_CHECKING([for struct addrinfo])
+AC_TRY_COMPILE(
+	[
+		#include <sys/types.h>
+		#include <sys/socket.h>
+		#include <netdb.h>
+	],
+	[struct addrinfo s; s.ai_flags = AI_PASSIVE;],
+	[
+		AC_DEFINE(HAVE_STRUCT_ADDRINFO)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+# Checks for structure members
+AC_MSG_CHECKING([whether utmp.h has ut_host field])
+AC_EGREP_HEADER(ut_host, utmp.h, 
+	[AC_DEFINE(HAVE_HOST_IN_UTMP) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmpx.h has ut_host field])
+AC_EGREP_HEADER(ut_host, utmpx.h, 
+	[AC_DEFINE(HAVE_HOST_IN_UTMPX) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmpx.h has syslen field])
+AC_EGREP_HEADER(syslen, utmpx.h, 
+	[AC_DEFINE(HAVE_SYSLEN_IN_UTMPX) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmp.h has ut_pid field])
+AC_EGREP_HEADER(ut_pid, utmp.h, 
+	[AC_DEFINE(HAVE_PID_IN_UTMP) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmp.h has ut_type field])
+AC_EGREP_HEADER(ut_type, utmp.h, 
+	[AC_DEFINE(HAVE_TYPE_IN_UTMP) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmp.h has ut_tv field])
+AC_EGREP_HEADER(ut_tv, utmp.h, 
+	[AC_DEFINE(HAVE_TV_IN_UTMP) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmp.h has ut_id field])
+AC_EGREP_HEADER(ut_id, utmp.h, 
+	[AC_DEFINE(HAVE_ID_IN_UTMP) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmp.h has ut_addr field])
+AC_EGREP_HEADER(ut_addr, utmp.h, 
+	[AC_DEFINE(HAVE_ADDR_IN_UTMP) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmpx.h has ut_addr field])
+AC_EGREP_HEADER(ut_addr, utmpx.h, 
+	[AC_DEFINE(HAVE_ADDR_IN_UTMPX) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmp.h has ut_addr_v6 field])
+AC_EGREP_HEADER(ut_addr_v6, utmp.h, 
+	[AC_DEFINE(HAVE_ADDR_V6_IN_UTMP) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether utmpx.h has ut_addr_v6 field])
+AC_EGREP_HEADER(ut_addr_v6, utmpx.h, 
+	[AC_DEFINE(HAVE_ADDR_V6_IN_UTMPX) AC_MSG_RESULT(yes); ], 
+	[AC_MSG_RESULT(no)]
+)
+
+AC_MSG_CHECKING([whether struct sockaddr_storage has ss_family field])
+AC_TRY_COMPILE(
+	[
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	],
+	[struct sockaddr_storage s; s.ss_family = 1;],
+	[
+		AC_DEFINE(HAVE_SS_FAMILY_IN_SS)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+AC_MSG_CHECKING([whether struct sockaddr_storage has __ss_family field])
+AC_TRY_COMPILE(
+	[
+		#include <sys/types.h>
+		#include <sys/socket.h>
+	],
+	[struct sockaddr_storage s; s.__ss_family = 1;],
+	[
+		AC_DEFINE(HAVE___SS_FAMILY_IN_SS)
+		AC_MSG_RESULT(yes)
+	],
+	[AC_MSG_RESULT(no)]
+)
+
+AC_MSG_CHECKING([whether libc defines __progname])
+AC_TRY_LINK([], 
+	[extern char *__progname; printf("%s", __progname);], 
+	[
+		AC_DEFINE(HAVE___PROGNAME)
+		AC_MSG_RESULT(yes)
+	], 
+	[
+		AC_MSG_RESULT(no)
+	]
+)
+
+# Looking for programs, paths and files
+AC_ARG_WITH(rsh,
+	[  --with-rsh=PATH         Specify path to remote shell program ],
+	[
+		if test "x$withval" != "$no" ; then
+			AC_DEFINE_UNQUOTED(RSH_PATH, "$withval")
+		fi
+	],
+	[
+		AC_PATH_PROG(rsh_path, rsh)
+	]
+)
+
+AC_ARG_WITH(xauth,
+	[  --with-xauth=PATH       Specify path to xauth program ],
+	[
+		if test "x$withval" != "$xno" ; then
+			AC_DEFINE_UNQUOTED(XAUTH_PATH, "$withval")
+		fi
+	],
+	[
+		AC_PATH_PROG(xauth_path, xauth)
+		if test ! -z "$xauth_path" -a -x "/usr/openwin/bin/xauth" ; then
+			xauth_path="/usr/openwin/bin/xauth"
+		fi
+	]
+)
+
+if test ! -z "$xauth_path" ; then
+	AC_DEFINE_UNQUOTED(XAUTH_PATH, "$xauth_path")
+fi
+if test ! -z "$rsh_path" ; then
+	AC_DEFINE_UNQUOTED(RSH_PATH, "$rsh_path")
+fi
+
+# Check for mail directory (last resort if we cannot get it from headers)
+if test ! -z "$MAIL" ; then
+	maildir=`dirname $MAIL`
+	AC_DEFINE_UNQUOTED(MAIL_DIRECTORY, "$maildir")
+fi
+
+# Look for lastlog location
+AC_ARG_WITH(lastlog,
+	[  --with-lastlog=FILE     Location of lastlog file],
+	[
+		if test "x$withval" = "xno" ; then
+			AC_DEFINE(DISABLE_LASTLOG)
+		else
+			AC_DEFINE_UNQUOTED(LASTLOG_LOCATION, "$withval")
+		fi
+	],
+	[
+		AC_MSG_CHECKING([location of lastlog file])
+		for lastlog in /var/log/lastlog /var/adm/lastlog /usr/adm/lastlog  /etc/security/lastlog ; do
+			if test -f $lastlog ; then
+				gotlastlog="file"
+				break
+			fi
+			if test -d $lastlog ; then
+				gotlastlog="dir"
+				break
+			fi
+		done
+		if test -z "$gotlastlog" ; then
+			AC_MSG_RESULT(not found)
+			nolastlog=1
+		else
+			if test "x$gotlastlog" = "xdir" ; then
+				AC_MSG_RESULT(${lastlog}/)
+				AC_DEFINE(LASTLOG_IS_DIR)
+			else
+				AC_MSG_RESULT($lastlog)
+				AC_DEFINE_UNQUOTED(LASTLOG_LOCATION, "$lastlog")
+			fi
+		fi	
+	]
+)
+
+if test ! -z "$nolastlog" ; then
+	AC_MSG_WARN([*** Disabling lastlog support *** ])
+	AC_DEFINE(DISABLE_LASTLOG)
+fi
+
+if test -z "$no_dev_ptmx" ; then
+	AC_CHECK_FILE("/dev/ptmx", 
+		[
+			AC_DEFINE_UNQUOTED(HAVE_DEV_PTMX)
+			have_dev_ptmx=1
+		]
+	)
+fi
+AC_CHECK_FILE("/dev/ptc", 
+	[
+		AC_DEFINE_UNQUOTED(HAVE_DEV_PTS_AND_PTC)
+		have_dev_ptc=1
+	]
+)
+
+# Options from here on. Some of these are preset by platform above
+
+# Check for user-specified random device, otherwise check /dev/urandom
+AC_ARG_WITH(random,
+	[  --with-random=FILE      read randomness from FILE (default=/dev/urandom)],
+	[
+		RANDOM_POOL="$withval";
+		AC_DEFINE_UNQUOTED(RANDOM_POOL, "$RANDOM_POOL")
+	],
+	[
+		# Check for random device
+		AC_CHECK_FILE("/dev/urandom",
+			[
+				RANDOM_POOL="/dev/urandom"; 
+				AC_SUBST(RANDOM_POOL)
+				AC_DEFINE_UNQUOTED(RANDOM_POOL, "$RANDOM_POOL")
+			]
+		)
+	]
+)
+
+# Check for EGD pool file
+AC_ARG_WITH(egd-pool,
+	[  --with-egd-pool=FILE    read randomness from EGD pool FILE (default none)],
+	[
+		RANDOM_POOL="$withval";
+		AC_DEFINE(HAVE_EGD)
+		AC_SUBST(RANDOM_POOL)
+		AC_DEFINE_UNQUOTED(RANDOM_POOL, "$RANDOM_POOL")
+	]
+)
+
+# Make sure we have some random number support
+if test -z "$RANDOM_POOL" -a -z "$EGD_POOL"; then
+	AC_MSG_ERROR([No random device found, and no EGD random pool specified])
+fi
+
+AC_ARG_WITH(catman,
+	[  --with-catman=man|cat   Install preformatted manpages[no]],
+	[
+		MANTYPE='$(CATMAN)'
+		if test x"$withval" != x"yes" ; then
+		   mansubdir=$withval
+		else
+		   mansubdir=cat
+		fi
+	], [
+		if test -z "$MANTYPE" ; then
+			MANTYPE='$(TROFFMAN)'
+			mansubdir=man
+		fi
+	]
+)
+AC_SUBST(MANTYPE)
+AC_SUBST(mansubdir)
+
+# Check whether user wants Kerberos support
+AC_ARG_WITH(kerberos4,
+	[  --with-kerberos4=PATH   Enable Kerberos 4 support],
+	[
+		if test "x$withval" != "xno" ; then
+	
+			if test "x$withval" != "$xyes" ; then
+				CFLAGS="$CFLAGS -I${withval}/include"
+				LDFLAGS="$LDFLAGS -L${withval}/lib"
+				if test ! -z "$need_dash_r" ; then
+					LDFLAGS="$LDFLAGS -R${withval}/lib"
+				fi
+				if test ! -z "$blibpath" ; then
+					blibpath="$blibpath:${withval}/lib"
+				fi
+			else
+				if test -d /usr/include/kerberosIV ; then
+					CFLAGS="$CFLAGS -I/usr/include/kerberosIV"
+				fi
+			fi
+
+			AC_CHECK_HEADERS(krb.h)
+			AC_CHECK_LIB(krb, main)
+			if test "$ac_cv_header_krb_h" != yes; then
+				AC_MSG_WARN([Cannot find krb.h, build may fail])
+			fi
+			if test "$ac_cv_lib_krb_main" != yes; then
+				AC_MSG_WARN([Cannot find libkrb, build may fail])
+			fi
+
+			KLIBS="-lkrb -ldes"
+			AC_CHECK_LIB(resolv, dn_expand, , )
+			KRB4=yes
+			AC_DEFINE(KRB4)
+		fi
+	]
+)
+
+# Check whether user wants AFS support
+AC_ARG_WITH(afs,
+	[  --with-afs=PATH         Enable AFS support],
+	[
+		if test "x$withval" != "xno" ; then
+
+			if test "x$withval" != "$xyes" ; then
+				CFLAGS="$CFLAGS -I${withval}/include"
+				LFLAGS="$LFLAGS -L${withval}/lib"
+			fi
+
+			if test -z "$KRB4" ; then
+				AC_MSG_WARN([AFS requires Kerberos IV support, build may fail])
+			fi
+
+			LIBS="$LIBS -lkafs"
+			if test ! -z "$AFS_LIBS" ; then
+				LIBS="$LIBS $AFS_LIBS"
+			fi
+			AC_DEFINE(AFS)
+		fi
+	]
+)
+LIBS="$LIBS $KLIBS"
+
+# Check whether user wants S/Key support
+AC_ARG_WITH(skey,
+	[  --with-skey             Enable S/Key support],
+	[
+		if test "x$withval" != "xno" ; then
+			AC_DEFINE(SKEY)
+			LIBS="$LIBS -lskey"
+		fi
+	]
+)
+
+# Check whether user wants TCP wrappers support
+AC_ARG_WITH(tcp-wrappers,
+	[  --with-tcp-wrappers     Enable tcpwrappers support],
+	[
+		if test "x$withval" != "xno" ; then
+			saved_LIBS="$LIBS"
+			LIBS="$LIBS -lwrap"
+			AC_MSG_CHECKING(for libwrap)
+			AC_TRY_LINK(
+				[
+					#include <tcpd.h>
+					int deny_severity = 0, allow_severity = 0;
+				],
+				[hosts_access(0);],
+				[
+					AC_MSG_RESULT(yes)
+					AC_DEFINE(LIBWRAP)
+				],
+				[
+					AC_MSG_RESULT(no)
+					AC_MSG_WARN([*** libwrap missing - tcpwrapper support disabled ***])
+					LIBS="$saved_LIBS"
+				]
+			)
+		fi
+	]
+)
+
+# Check whether to enable MD5 passwords
+AC_ARG_WITH(md5-passwords,
+	[  --with-md5-passwords    Enable use of MD5 passwords],
+	[
+		if test "x$withval" != "xno" ; then
+			AC_DEFINE(HAVE_MD5_PASSWORDS)
+		fi
+	]
+)
+
+# Check whether to enable utmpx support
+AC_ARG_WITH(utmpx,
+	[  --with-utmpx            Enable utmpx support],
+	[
+		if test "x$withval" != "xno" ; then
+			AC_DEFINE(USE_UTMPX)
+		fi
+	]
+)
+
+# Whether to disable shadow password support
+AC_ARG_WITH(shadow,
+	[  --without-shadow        Disable shadow password support],
+	[
+		if test "x$withval" = "xno" ; then	
+			AC_DEFINE(DISABLE_SHADOW)
+		fi
+	]
+)
+
+# Use ip address instead of hostname in $DISPLAY
+AC_ARG_WITH(ipaddr-display,
+	[  --with-ipaddr-display   Use ip address instead of hostname in \$DISPLAY],
+	[
+		if test "x$withval" = "xno" ; then	
+			AC_DEFINE(IPADDR_IN_DISPLAY)
+		fi
+	]
+)
+
+# Whether to mess with the default path
+AC_ARG_WITH(default-path,
+	[  --with-default-path=PATH Specify default \$PATH environment for server],
+	[
+		if test "x$withval" != "xno" ; then	
+			AC_DEFINE_UNQUOTED(USER_PATH, "$withval")
+		fi
+	]
+)
+
+# Whether to force IPv4 by default (needed on broken glibc Linux)
+AC_ARG_WITH(ipv4-default,
+	[  --with-ipv4-default     Use IPv4 by connections unless '-6' specified],
+	[
+		if test "x$withval" != "xno" ; then	
+			AC_DEFINE(IPV4_DEFAULT)
+		fi
+	]
+)
+
+AC_MSG_CHECKING([to convert IPv4 in IPv6-mapped addresses])
+AC_ARG_WITH(4in6,
+	[  --with-4in6             Check for and convert IPv4 in IPv6 mapped addresses],
+	[
+		if test "x$withval" != "xno" ; then
+			AC_MSG_RESULT(yes)
+			AC_DEFINE(IPV4_IN_IPV6)
+		else
+			AC_MSG_RESULT(no)
+		fi
+	],[
+		if test "x$inet6_default_4in6" = "xyes"; then
+			AC_MSG_RESULT([yes (default)])
+			AC_DEFINE(IPV4_IN_IPV6)
+		else
+			AC_MSG_RESULT([no (default)])
+		fi
+	]
+)
+
+# Where to place sshd.pid
+piddir=/var/run
+AC_ARG_WITH(pid-dir,
+	[  --with-pid-dir=PATH     Specify location of ssh.pid file],
+	[
+		if test "x$withval" != "xno" ; then	
+			piddir=$withval
+		fi
+	]
+)
+AC_DEFINE_UNQUOTED(PIDDIR, "$piddir")
+AC_SUBST(piddir)
+
+if test ! -z "$blibpath" ; then
+	LDFLAGS="$LDFLAGS -blibpath:$blibpath"
+	AC_MSG_WARN([Please check and edit -blibpath in LDFLAGS in Makefile])
+fi
+
+AC_OUTPUT(Makefile)

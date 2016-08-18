@@ -1,0 +1,23 @@
+# 
+# 不可注册 ID 之规则
+#	注释用 # 号标记。
+# 	头部带有 * 的 ID 表示新注册之 ID 中不可含有该字符串
+#       除此之外的则完全匹配你给定的字符串
+#		sys
+#       		表示不能注册 sys 这个 ID
+#		*sys
+#		        表示不能注册含有 sys 的 ID。
+#
+new
+root
+anonymous
+nobody
+test
+*bbs
+mail
+ftp
+www
+gopher
+secret
+bms
+deliver
